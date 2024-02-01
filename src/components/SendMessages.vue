@@ -25,12 +25,12 @@
           id="btn-input"
           type="text"
           class="form-control input-sm"
-          placeholder="Type your message here..."
+          placeholder="Mesajınızı buraya yazın..."
           v-model="msg"
         />
         <span class="input-group-btn">
           <button class="btn btn-primary" id="btn-chat" @click="sendMessages">
-            Send
+            Gönder
           </button>
         </span>
       </div>
@@ -40,8 +40,6 @@
 
 <script>
 import axios from "axios";
-// import { userData } from "@/stores/index";
-// import { mapState } from "pinia";
 import { useCookies } from "vue3-cookies";
 
 export default {
@@ -82,13 +80,6 @@ export default {
       const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
 
       return `${formattedHours}:${formattedMinutes}`;
-    },
-    scrollChatToBottom() {
-      const chatBox = this.$refs.chatBox;
-
-      if (chatBox) {
-        chatBox.scrollTop = chatBox.scrollHeight;
-      }
     },
     getClass(userID) {
       return userID == this.complaint.userId

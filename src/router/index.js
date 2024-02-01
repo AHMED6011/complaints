@@ -1,5 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { isAllowed } from "../main";
+import { useCookies } from "vue3-cookies";
+
+const isStaff = useCookies().cookies.get("isStaff");
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -8,7 +11,7 @@ const router = createRouter({
       path: "/AddComplaint",
       name: "AddComplaint",
       beforeEnter: (to, from, next) => {
-        if (isAllowed) {
+        if (isStaff == "false") {
           next();
         } else {
           next("/");
@@ -36,6 +39,13 @@ const router = createRouter({
     {
       path: "/complaints",
       name: "complaints",
+      beforeEnter: (to, from, next) => {
+        if (isAllowed) {
+          next();
+        } else {
+          next("/");
+        }
+      },
       component: () => import("../views/MyComplaints.vue"),
     },
 
@@ -43,7 +53,7 @@ const router = createRouter({
       path: "/admin",
       name: "admin",
       beforeEnter: (to, from, next) => {
-        if (isAllowed) {
+        if (isAllowed && isStaff == "true") {
           next();
         } else {
           next("/");

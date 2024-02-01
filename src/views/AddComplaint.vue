@@ -3,30 +3,33 @@
     <div class="container-fluid">
       <div class="row text-center">
         <div class="col-12 main-bg">
-          <h1>We receive complaints around the clock</h1>
-          <i class="fa-solid fa-chevron-down fa-bounce fa-2xl"></i>
+          <h1>Şehrimizi Güzelleştir</h1>
         </div>
-        <div class="col-12 my-5">
-          <div class="container d-flex justify-content-center">
+        <div class="col-12 my-5 add-box">
+          <div
+            class="container position-relative d-flex justify-content-center"
+          >
             <form
               class="row g-3 needs-validation"
               novalidate
               @submit.prevent="submitForm"
             >
               <div class="col-8">
-                <input
+                <textarea
+                  cols="30"
+                  rows="10"
                   type="text"
-                  placeholder=" Country & City"
-                  class="form-control"
+                  placeholder=" Adres"
+                  class="form-control adres-input"
                   id="validationCustom1"
                   autocomplete="off"
                   v-model="address"
                   required
-                />
+                ></textarea>
 
                 <input
                   type="text"
-                  placeholder="Title"
+                  placeholder="Başlık"
                   class="form-control my-3"
                   id="validationCustom2"
                   autocomplete="off"
@@ -38,18 +41,22 @@
                   id="validationCustom0"
                   class="form-select mb-3"
                   aria-label="Default select example"
-                  title="Select A Category"
+                  title="Kategori seç"
                   v-model="category"
                 >
-                  <option value="" disabled selected>Select A Category</option>
-                  <option value="Water">Water</option>
-                  <option value="Internet">Internet</option>
-                  <option value="Gas">Gas</option>
-                  <option value="Electricity">Electricity</option>
+                  <option value="" disabled selected>Kategori seç</option>
+                  <option value="Yol ve çevre düzeni">
+                    Yol ve çevre düzeni
+                  </option>
+                  <option value="Kaski">Kaski</option>
+                  <option value="Armadaş">Armadaş</option>
+                  <option value="Akedaş">Akedaş</option>
+                  <option value="Sokak hayvanı">Sokak hayvanı</option>
+                  <option value="Çöp birikmesi">Çöp birikmesi</option>
+                  <option value="Ulaşım ihbarı">Ulaşım ihbarı</option>
+                  <option value="Zabıta">Zabıta</option>
+                  <option value="Diğer">Diğer</option>
                 </select>
-                <div class="invalid-feedback">
-                  Please enter a valid category.
-                </div>
 
                 <label class="custum-file-upload" for="file">
                   <div class="icon">
@@ -75,32 +82,34 @@
                     </svg>
                   </div>
                   <div class="text">
-                    <span>upload image</span>
+                    <span>Fotoğraf yükle</span>
                   </div>
-                  <input type="file" id="file" @change="selectedImg" required />
-                  <p>Selected File: {{ imageFile }}</p>
+                  <input
+                    type="file"
+                    id="file"
+                    @change="selectedImg"
+                    accept="image/*"
+                    required
+                  />
+                  <p>
+                    Seçilen Dosya: <strong>{{ imageName }}</strong>
+                  </p>
                 </label>
-                <div class="invalid-feedback">
-                  Please enter a valid Address.
-                </div>
               </div>
               <div class="col-8">
                 <textarea
                   type="text"
                   class="form-control"
-                  placeholder="Your Complaint"
+                  placeholder="Şikayetiniz"
                   id="validationCustom3"
                   v-model="desc"
                   autocomplete="off"
                   required
                 ></textarea>
-                <div class="invalid-feedback">
-                  Please enter a valid Complaint.
-                </div>
               </div>
               <div class="col-8">
                 <button class="btn btn-primary" @click.prevent="addComplaint">
-                  Send Complaint
+                  Açıklama
                 </button>
               </div>
             </form>
@@ -122,11 +131,18 @@ export default {
       address: "",
       title: "",
       imageFile: null,
+      imageName: "",
     };
   },
   methods: {
     selectedImg(event) {
       this.imageFile = event.target.files[0];
+      this.imageName = event.target.files[0].name;
+      if (event && this.imageFile(event)) {
+        console.log("Selected image file:", event);
+      } else {
+        console.warn("Please select a valid image file.");
+      }
     },
     async addComplaint() {
       if (
@@ -136,8 +152,7 @@ export default {
         !this.address ||
         !this.imageFile
       ) {
-        alert("Please fill in all the required fields");
-        return;
+        sweetAlert("Oops...", "Sanırım girişi doldurmayı unuttunuz", "error");
       }
 
       const formData = new FormData();
@@ -174,13 +189,27 @@ export default {
           }
         );
 
-        console.log("Complaint added successfully:", response.data);
+        swal(
+          {
+            title: "",
+            text: "Şehrimizi daha iyi bir yer haline getirmemize katkı sağladığınız için teşekkür ederiz. En kısa sürede size yanıt vereceğiz",
+            type: "success",
+            confirmButtonColor: "#a5dc86",
+            confirmButtonText: "TAMAM",
+            closeOnConfirm: false,
+          },
+          function (isConfirm) {
+            if (isConfirm) {
+              location.replace("/complaints");
+            }
+          }
+        );
 
         this.category = "";
         this.desc = "";
         this.address = "";
         this.title = "";
-        this.imageFile = null;
+        this.imageFile = "";
       } catch (error) {
         console.error(
           "An error occurred during the complaint addition:",
@@ -208,6 +237,8 @@ export default {
     color: #f8f8f8;
     text-shadow: 4px 4px 6px black;
     font-size: 45px;
+    margin-bottom: 150px;
+    padding-bottom: 50px;
   }
 
   i {
@@ -226,42 +257,40 @@ export default {
     width: 100%;
     height: 100%;
   }
-
-  .slide-top {
-    -webkit-animation: slide-top 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)
-      infinite alternate forwards;
-    animation: slide-top 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite
-      alternate forwards;
-  }
 }
 
 form {
   width: 90%;
   justify-content: center;
+  background-color: white;
   align-items: center;
   box-shadow: 0px 0px 45px 2px #898989;
   border-radius: 10px;
   padding: 30px 0;
+  position: absolute;
+  top: -230px;
   .form-label {
     font-size: bold;
   }
 
   textarea {
-    height: 200px;
+    height: 100px;
+  }
+  .adres-input {
+    resize: none;
+    height: 75px;
   }
 
   .custum-file-upload {
     display: flex;
     flex-direction: column;
-    align-items: space-between;
-    gap: 20px;
+    gap: 10px;
     cursor: pointer;
     align-items: center;
     justify-content: center;
     border: 2px dashed #cacaca;
     background-color: rgba(255, 255, 255, 1);
     padding: 1.5rem;
-    margin-top: 20px;
     border-radius: 10px;
     box-shadow: 0px 48px 35px -48px rgba(0, 0, 0, 0.1);
   }
@@ -273,7 +302,7 @@ form {
   }
 
   .custum-file-upload .icon svg {
-    height: 50px;
+    height: 40px;
     fill: rgba(75, 85, 99, 1);
   }
 

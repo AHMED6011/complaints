@@ -1,8 +1,11 @@
 <template>
   <div>
     <nav class="navbar navbar-expand-lg bg-dark">
-      <div class="container-fluid">
-        <RouterLink class="navbar-brand pe-5" to="/complaints">
+      <div class="container">
+        <RouterLink
+          class="navbar-brand pe-5"
+          :to="isStaff ? '/admin' : '/complaints'"
+        >
           <i class="fa-solid fa-phone fa-2xl text-primary"></i>
         </RouterLink>
         <button
@@ -16,20 +19,30 @@
         >
           <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0 text-light">
+        <div
+          class="collapse navbar-collapse justify-content-end"
+          id="navbarSupportedContent"
+        >
+          <ul class="navbar-nav mb-2 mb-lg-0 text-light">
             <li v-if="this.isAllow" class="nav-item">
-              <RouterLink class="nav-link" to="/complaints"
-                >All Complaints</RouterLink
-              >
+              <RouterLink
+                class="nav-link"
+                :to="isStaff ? '/admin' : '/complaints'"
+                >Tüm Şikayetler
+              </RouterLink>
             </li>
-            <li v-if="this.isAllow" class="nav-item">
+            <li v-if="!isStaff == true && this.isAllow" class="nav-item">
               <RouterLink class="nav-link" to="/AddComplaint"
-                >Add Complaints</RouterLink
+                >Şikayet Ekle</RouterLink
               >
             </li>
             <li v-if="!this.isAllow" class="nav-item">
-              <RouterLink class="nav-link" to="/">Login</RouterLink>
+              <RouterLink class="nav-link" to="/">Giriş yapmak</RouterLink>
+            </li>
+            <li v-if="!this.isAllow" class="nav-item">
+              <RouterLink class="nav-link" to="/createUser"
+                >Üye olmak</RouterLink
+              >
             </li>
             <li v-if="this.isAllow" class="nav-item">
               <button
@@ -40,22 +53,6 @@
               </button>
             </li>
           </ul>
-          <form class="d-flex" role="search">
-            <input
-              class="form-control me-2"
-              type="search"
-              placeholder="Search"
-              aria-label="Search"
-              v-model="searchInput"
-            />
-            <button
-              class="btn btn-outline-primary"
-              type="button"
-              @click="searchComplaint"
-            >
-              Search
-            </button>
-          </form>
         </div>
       </div>
     </nav>
@@ -64,8 +61,6 @@
 
 <script>
 import { useCookies } from "vue3-cookies";
-import { useComplaintsStore } from "@/stores/index";
-import { mapActions, mapState } from "pinia";
 
 export default {
   name: "HeaderView",
@@ -73,23 +68,44 @@ export default {
   data() {
     return {
       cookies: useCookies().cookies,
+      isStaff: false,
     };
   },
   methods: {
     deleteAccount() {
-      this.cookies.set("myCookie", "", { expires: new Date(0) });
-      this.cookies.set("isStaff", "");
-      location.replace("/");
+      swal(
+        {
+          title: "Emin misin?",
+          text: "Hesap silinecek",
+          type: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#DD6B55",
+          confirmButtonText: "evet",
+          cancelButtonText: "iptal",
+          closeOnConfirm: false,
+          closeOnCancel: false,
+        },
+        function (isConfirm) {
+          if (isConfirm) {
+            useCookies().cookies.set("myCookie", "", { expires: new Date(0) });
+            useCookies().cookies.set("isStaff", "");
+            location.replace("/");
+          } else {
+            swal("İptal edildi", "", "error");
+          }
+        }
+      );
     },
-    ...mapActions(useComplaintsStore, ["searchComplaint"]),
-  },
-  computed: {
-    ...mapState(useComplaintsStore, ["searchInput"]),
+    isAdmin() {
+      if (this.cookies.get("isStaff") == "true") {
+        this.isStaff = true;
+      } else {
+        this.isStaff = false;
+      }
+    },
   },
   created() {
-    setTimeout(() => {
-      console.log(this.searchInput.valueOf);
-    }, 6000);
+    this.isAdmin();
   },
 };
 </script>

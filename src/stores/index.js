@@ -23,13 +23,5 @@ export const useComplaintsStore = defineStore("complaints", {
         console.error("Error fetching complaints:", error);
       }
     },
-
-    searchComplaint(val) {
-      const result = valtoLowerCase();
-
-      const response = complaints.filter((complaint) =>
-        complaint.title.toLowerCase().includes(result)
-      );
-    },
   },
 });

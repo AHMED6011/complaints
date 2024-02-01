@@ -1,119 +1,154 @@
 <template>
   <main>
-    <div class="container" v-if="complaint">
-      <div class="header-title">
-        <h1 class="text-center py-5 text-primary">Complaint Details</h1>
-        <div :class="IsStaff()">
-          <button
-            @click.prevent="accepted"
-            v-if="complaint.status === 0"
-            class="btn m-2 text-light fw-bold bg-success"
+    <div class="container spinner-container" v-if="!complaint">
+      <div class="row border-0 justify-content-center align-items-centers">
+        <div class="col-12 mt-5 pt-5 text-center">
+          <svg
+            class="spinner"
+            width="65px"
+            height="65px"
+            viewBox="0 0 66 66"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            Accept
-          </button>
-          <button
-            @click.prevent="rejected"
-            v-if="complaint.status === 0"
-            class="btn m-2 text-light fw-bold bg-danger"
-          >
-            Reject
-          </button>
-          <button
-            @click.prevent="inProgress"
-            v-if="complaint.status === 1"
-            class="btn m-2 text-light fw-bold bg-warning"
-          >
-            In Progress
-          </button>
-          <button
-            @click.prevent="closed"
-            v-if="complaint.status === 3"
-            class="btn m-2 text-light fw-bold bg-dark"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-12 col-md-3 col-sm-6 text-center">
-          <h4 class="my-4">Title</h4>
-          <p>{{ complaint.title }}</p>
-        </div>
-        <div class="col-12 col-md-3 col-sm-6 text-center">
-          <h4 class="my-4">Date</h4>
-          <p>{{ formatDate(complaint.createdDate) }}</p>
-        </div>
-        <div class="col-12 col-md-3 col-sm-6 text-center">
-          <h4 class="my-4">Address</h4>
-          <p>{{ complaint.address }}</p>
-        </div>
-        <div class="col-12 col-md-3 col-sm-6 text-center">
-          <h4 class="my-4">Category</h4>
-          <p>{{ complaint.category }}</p>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-12 col-md-8 text-center desc">
-          <h4 class="my-4">Description</h4>
-          <p class="">{{ complaint.description }}</p>
-        </div>
-        <div class="col-12 col-md-4 text-center status">
-          <h4 class="my-4">Status</h4>
-          <p>
-            <span class="state">
-              {{ getStatusMessage(complaint.status) }}
-            </span>
-          </p>
-        </div>
-      </div>
-      <div class="row mt-4 justify-content-center">
-        <div class="col-4 text-center">
-          <h3>Logs</h3>
-          <ul class="list-group" v-for="log in complaint.logs" :key="log.id">
-            <li class="list-group-item border-0">
-              {{ log.logText }}
-            </li>
-            <li class="list-group-item border-0">
-              {{ formatDate(log.logDate) }}
-            </li>
-          </ul>
-        </div>
-        <div class="col-12 col-md-8" v-if="complaint.image">
-          <h2 class="text-center">Image</h2>
-          <img
-            class="img-fluid"
-            :src="`${this.API}/api/Files/${complaint.image}`"
-            alt=""
-          />
+            <circle
+              class="path"
+              fill="none"
+              stroke-width="6"
+              stroke-linecap="round"
+              cx="33"
+              cy="33"
+              r="30"
+            ></circle>
+          </svg>
         </div>
       </div>
     </div>
-    <button
-      class="btn btn-messages"
-      data-bs-toggle="offcanvas"
-      data-bs-target="#offcanvasExample"
-      aria-controls="offcanvasExample"
-      @click="openChatBox"
-    >
-      <i class="fa-regular fa-comment-dots"></i>
-    </button>
-    <div
-      class="offcanvas offcanvas-start"
-      tabindex="-1"
-      id="offcanvasExample"
-      aria-labelledby="offcanvasExampleLabel"
-    >
-      <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="offcanvasExampleLabel">Chat Box</h5>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="offcanvas"
-          aria-label="Close"
-        ></button>
+    <div v-if="complaint">
+      <div class="container">
+        <div class="header-title">
+          <h1 class="text-center py-5 text-primary fw-bold">
+            Şikayet Detayları
+          </h1>
+          <div :class="IsStaff()">
+            <button
+              @click.prevent="accepted"
+              v-if="complaint.status === 0"
+              class="btn m-2 text-light fw-bold bg-success"
+            >
+              Kabul etmek
+            </button>
+            <button
+              @click.prevent="rejected"
+              v-if="complaint.status === 0"
+              class="btn m-2 text-light fw-bold bg-danger"
+            >
+              Reddetmek
+            </button>
+            <button
+              @click.prevent="inProgress"
+              v-if="complaint.status === 1"
+              class="btn m-2 text-light fw-bold bg-warning"
+            >
+              Devam etmekte
+            </button>
+            <button
+              @click.prevent="closed"
+              v-if="complaint.status === 3"
+              class="btn m-2 text-light fw-bold bg-dark"
+            >
+              Kapalı
+            </button>
+            <button
+              @click.prevent="deleteComplaint"
+              v-if="complaint.status === 0"
+              class="btn m-2 text-light fw-bold bg-danger"
+            >
+              Kategoriyi Sil
+            </button>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12 col-md-3 col-sm-6 text-center">
+            <h4 class="my-4 fw-bold">Başlık</h4>
+            <p class="text-secondary">{{ complaint.title }}</p>
+          </div>
+          <div class="col-12 col-md-3 col-sm-6 text-center">
+            <h4 class="my-4 fw-bold">Tarih</h4>
+            <p class="text-secondary">
+              {{ formatDate(complaint.createdDate) }}
+            </p>
+          </div>
+          <div class="col-12 col-md-3 col-sm-6 text-center">
+            <h4 class="my-4 fw-bold">Adres</h4>
+            <p class="text-secondary">{{ complaint.address }}</p>
+          </div>
+          <div class="col-12 col-md-3 col-sm-6 text-center">
+            <h4 class="my-4 fw-bold">Kategori</h4>
+            <p class="text-secondary">{{ complaint.category }}</p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12 col-md-8 text-center desc">
+            <h4 class="my-4 fw-bold">Tanım</h4>
+            <p class="text-secondary">{{ complaint.description }}</p>
+          </div>
+
+          <div class="col-12 col-md-4 text-center">
+            <h4 class="my-4 fw-bold">Durum</h4>
+            <p class="text-secondary">
+              {{ getStatusMessage(complaint.status) }}
+            </p>
+          </div>
+        </div>
+        <div class="row border-0 mt-4 justify-content-center">
+          <div class="col-6 text-center">
+            <h3 class="my-4 fw-bold">Kütükler</h3>
+            <ul class="list-group" v-for="log in complaint.logs" :key="log.id">
+              <li
+                class="list-group-item text-secondary d-flex justify-content-around border-0 text-start"
+              >
+                <span> {{ log.logText }} </span>
+                <span> {{ formatDate(log.logDate) }} </span>
+              </li>
+            </ul>
+          </div>
+          <div class="col-12 col-md-6" v-if="complaint.image">
+            <h2 class="my-4 fw-bold text-center">Resim</h2>
+            <img
+              class="img-fluid"
+              :src="`${this.API}/api/Files/${complaint.image}`"
+              alt=""
+            />
+          </div>
+        </div>
       </div>
-      <div class="offcanvas-body ps-0">
-        <SendMessages :complaint="complaint" />
+      <button
+        class="btn btn-messages"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#offcanvasExample"
+        aria-controls="offcanvasExample"
+        @click="openChatBox"
+      >
+        <i class="fa-regular fa-comment-dots"></i>
+      </button>
+      <div
+        class="offcanvas offcanvas-start"
+        tabindex="-1"
+        id="offcanvasExample"
+        aria-labelledby="offcanvasExampleLabel"
+      >
+        <div class="offcanvas-header">
+          <h5 class="offcanvas-title" id="offcanvasExampleLabel">Mesajler</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="offcanvas"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="offcanvas-body ps-0">
+          <SendMessages :complaint="complaint" />
+        </div>
       </div>
     </div>
   </main>
@@ -130,7 +165,7 @@ export default {
   data() {
     return {
       complaint: null,
-      category: "",
+      Kategori: "",
       desc: "",
       address: "",
       title: "",
@@ -227,28 +262,15 @@ export default {
     },
     getStatusMessage(status) {
       if (status === 0) {
-        return "Pending";
+        return "Şikayet alındı";
       } else if (status === 1) {
-        return "Accepted";
+        return "Kabul edildi";
       } else if (status === 2) {
-        return "Rejected";
+        return "Reddedildi";
       } else if (status === 3) {
-        return "InProgress";
+        return "Devam ediyor";
       } else {
-        return "Closed";
-      }
-    },
-    getStatusMessage(status) {
-      if (status === 0) {
-        return "Pending";
-      } else if (status === 1) {
-        return "Accepted";
-      } else if (status === 2) {
-        return "Rejected";
-      } else if (status === 3) {
-        return "InProgress";
-      } else if (status === 4) {
-        return "Closed";
+        return "Tamamlandı";
       }
     },
     getStatusColor(status) {
@@ -271,11 +293,7 @@ export default {
       const day = date.getDate().toString().padStart(2, "0");
       return `${year}-${month}-${day}`;
     },
-    openChatBox() {
-      this.$nextTick(() => {
-        this.$refs.chatBox.scrollTop = this.$refs.chatBox.scrollHeight;
-      });
-    },
+
     IsStaff() {
       if (this.cookies.get("isStaff") == "true") {
         return "d-flex";
@@ -337,5 +355,65 @@ export default {
   display: flex;
   justify-content: space-evenly;
   align-items: center;
+}
+
+$offset: 187;
+$duration: 1.4s;
+
+.spinner-container {
+  height: 1000px;
+}
+
+.spinner {
+  animation: rotator $duration linear infinite;
+}
+
+@keyframes rotator {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(270deg);
+  }
+}
+
+.path {
+  stroke-dasharray: $offset;
+  stroke-dashoffset: 0;
+  transform-origin: center;
+  animation: dash $duration ease-in-out infinite,
+    colors ($duration * 4) ease-in-out infinite;
+}
+
+@keyframes colors {
+  0% {
+    stroke: #4285f4;
+  }
+  25% {
+    stroke: #de3e35;
+  }
+  50% {
+    stroke: #f7c223;
+  }
+  75% {
+    stroke: #1b9a59;
+  }
+  100% {
+    stroke: #4285f4;
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dashoffset: $offset;
+  }
+  50% {
+    stroke-dashoffset: $offset/4;
+    transform: rotate(135deg);
+  }
+  100% {
+    stroke-dashoffset: $offset;
+    transform: rotate(450deg);
+  }
 }
 </style>

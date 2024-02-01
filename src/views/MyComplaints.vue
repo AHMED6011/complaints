@@ -1,14 +1,53 @@
 <template>
   <main>
-    <h1 class="text-center py-5 text-primary">All Complaints</h1>
+    <h1
+      class="text-center py-5 text-primary fw-bold"
+      v-if="complaints.length == 0 && isErr == false"
+    >
+      Henüz Şikayet Yok
+    </h1>
+    <h1
+      class="text-center py-3 text-primary fw-bold"
+      v-if="complaints.length > 0"
+    >
+      Şikayetlerim
+    </h1>
 
-    <table class="responstable">
+    <div class="container spinner-container" v-if="isLoading">
+      <div class="row justify-content-center align-items-centers">
+        <div class="col-12 text-center">
+          <svg
+            class="spinner"
+            width="65px"
+            height="65px"
+            viewBox="0 0 66 66"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              class="path"
+              fill="none"
+              stroke-width="6"
+              stroke-linecap="round"
+              cx="33"
+              cy="33"
+              r="30"
+            ></circle>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <h1 class="text-center py-5 text-danger fw-bold" v-if="isErr">
+      {{ msgError }}
+    </h1>
+
+    <table class="responstable" v-if="complaints.length > 0">
       <tr>
-        <th>Title</th>
-        <th>Category</th>
-        <th>Date</th>
-        <th>Status</th>
-        <th>More Details</th>
+        <th>Başlık</th>
+        <th>Kategori</th>
+        <th>Tarih</th>
+        <th>Durum</th>
+        <th>Daha fazla detay</th>
       </tr>
 
       <tr v-for="complaint in complaints" :key="complaint.id">
@@ -27,7 +66,7 @@
           <RouterLink
             :to="{ name: 'ComplaintDetails', params: { id: complaint.id } }"
             class="btn btn-info text-dark"
-            >Show More Details</RouterLink
+            >Daha fazla detay</RouterLink
           >
         </td>
       </tr>
@@ -36,30 +75,31 @@
 </template>
 
 <script>
+import axios from "axios";
 import { useCookies } from "vue3-cookies";
-import { useComplaintsStore } from "@/stores/index";
-import { mapState, mapActions } from "pinia";
 
 export default {
   data() {
     return {
-      allComplaints: [],
-      Complaints: null,
+      complaints: [],
       cookies: useCookies().cookies,
+      isLoading: false,
+      isErr: false,
+      msgError: "",
     };
   },
   methods: {
     getStatusMessage(status) {
       if (status === 0) {
-        return "Pending";
+        return "Askıda olması";
       } else if (status === 1) {
-        return "Accepted";
+        return "Kabul edilmiş";
       } else if (status === 2) {
-        return "Rejected";
+        return "Reddedilmiş";
       } else if (status === 3) {
-        return "InProgress";
-      } else if (status === 4) {
-        return "Closed";
+        return "Devam etmekte";
+      } else {
+        return "Kapalı";
       }
     },
     getStatusColor(status) {
@@ -82,10 +122,26 @@ export default {
       const day = date.getDate().toString().padStart(2, "0");
       return `${year}-${month}-${day}`;
     },
-    ...mapActions(useComplaintsStore, ["fetchData", "searchComplaint"]),
-  },
-  computed: {
-    ...mapState(useComplaintsStore, ["complaints", "searchInput"]),
+    async fetchData() {
+      try {
+        this.isLoading = true;
+        const token = this.cookies.get("myCookie");
+        const response = await axios.get(`${this.API}/api/Complaints`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        this.isLoading = false;
+
+        return (this.complaints = response.data);
+      } catch (error) {
+        this.isLoading = false;
+        this.isErr = true;
+
+        this.msgError = "İşlem sırasında bir hata oluştu";
+      }
+    },
   },
 
   created() {
@@ -199,4 +255,64 @@ $table-header-border: 1px solid #fff;
   $header-text-color: $table-header-text-color,
   $header-border: $table-header-border
 );
+
+$offset: 187;
+$duration: 1.4s;
+
+.spinner-container {
+  padding-top: 100px;
+}
+
+.spinner {
+  animation: rotator $duration linear infinite;
+}
+
+@keyframes rotator {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(270deg);
+  }
+}
+
+.path {
+  stroke-dasharray: $offset;
+  stroke-dashoffset: 0;
+  transform-origin: center;
+  animation: dash $duration ease-in-out infinite,
+    colors ($duration * 4) ease-in-out infinite;
+}
+
+@keyframes colors {
+  0% {
+    stroke: #4285f4;
+  }
+  25% {
+    stroke: #de3e35;
+  }
+  50% {
+    stroke: #f7c223;
+  }
+  75% {
+    stroke: #1b9a59;
+  }
+  100% {
+    stroke: #4285f4;
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dashoffset: $offset;
+  }
+  50% {
+    stroke-dashoffset: $offset/4;
+    transform: rotate(135deg);
+  }
+  100% {
+    stroke-dashoffset: $offset;
+    transform: rotate(450deg);
+  }
+}
 </style>

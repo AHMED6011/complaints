@@ -1,24 +1,63 @@
 <template>
   <main>
-    <h1 class="text-center py-5 text-primary">Admin Page</h1>
+    <h1
+      class="text-center py-5 text-primary fw-bold"
+      v-if="complaints.length == 0 && isErr == false"
+    >
+      Henüz Şikayet Yok
+    </h1>
+    <h1
+      class="text-center py-3 text-primary fw-bold"
+      v-if="complaints.length > 0"
+    >
+      <span v-if="isStaff == 'true'">Admin</span> Tüm Şikayetler
+    </h1>
 
-    <table class="responstable">
+    <div class="container spinner-container" v-if="isLoading">
+      <div class="row justify-content-center align-items-centers">
+        <div class="col-12 text-center">
+          <svg
+            class="spinner"
+            width="65px"
+            height="65px"
+            viewBox="0 0 66 66"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              class="path"
+              fill="none"
+              stroke-width="6"
+              stroke-linecap="round"
+              cx="33"
+              cy="33"
+              r="30"
+            ></circle>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <h1 class="text-center py-5 text-danger fw-bold" v-if="isErr">
+      {{ msgError }}
+    </h1>
+
+    <table class="responstable" v-if="complaints.length > 0">
       <tr>
-        <th>Title</th>
-        <th>Category</th>
-        <th>Date</th>
-        <th>Status</th>
-        <th>More Details</th>
+        <th>Başlık</th>
+        <th>Kategori</th>
+        <th>Tarih</th>
+        <th>Durum</th>
+        <th>Daha fazla detay</th>
       </tr>
 
-      <tr v-for="complaint in allComplaints" :key="complaint.id">
+      <tr v-for="complaint in complaints" :key="complaint.id">
         <td>{{ complaint.title }}</td>
         <td>{{ complaint.category }}</td>
         <td>{{ formatDate(complaint.createdDate) }}</td>
         <td>
           <span
-            class="state text-light"
-            :style="{ backgroundColor: getStatusColor(complaint.status) }"
+            class="state"
+            :style="{ color: getStatusColor(complaint.status) }"
           >
             {{ getStatusMessage(complaint.status) }}
           </span>
@@ -27,7 +66,7 @@
           <RouterLink
             :to="{ name: 'ComplaintDetails', params: { id: complaint.id } }"
             class="btn btn-info text-dark"
-            >Show More Details</RouterLink
+            >Daha fazla detay</RouterLink
           >
         </td>
       </tr>
@@ -37,37 +76,31 @@
 
 <script>
 import axios from "axios";
-import { RouterLink } from "vue-router";
+import { useCookies } from "vue3-cookies";
 
 export default {
-  components: { RouterLink },
-
   data() {
     return {
-      allComplaints: [],
-      Complaints: null,
+      complaints: [],
+      cookies: useCookies().cookies,
+      isStaff: useCookies().cookies.get("isStaff"),
+      isLoading: false,
+      isErr: false,
+      msgError: "",
     };
   },
   methods: {
-    async getComplaints() {
-      try {
-        const response = await axios.get(`${this.API}/api/Complaints`);
-        this.allComplaints = response.data.reverse();
-      } catch (err) {
-        console.log(err);
-      }
-    },
     getStatusMessage(status) {
       if (status === 0) {
-        return "Pending";
+        return "Şikayet alındı";
       } else if (status === 1) {
-        return "Accepted";
+        return "Kabul edildi";
       } else if (status === 2) {
-        return "Rejected";
+        return "Reddedildi";
       } else if (status === 3) {
-        return "InProgress";
-      } else if (status === 4) {
-        return "Closed";
+        return "Devam ediyor";
+      } else {
+        return "Tamamlandı";
       }
     },
     getStatusColor(status) {
@@ -80,7 +113,7 @@ export default {
       } else if (status === 3) {
         return "#ffc107";
       } else if (status === 4) {
-        return "#f8f9fa";
+        return "#000000";
       }
     },
     formatDate(dateString) {
@@ -90,10 +123,30 @@ export default {
       const day = date.getDate().toString().padStart(2, "0");
       return `${year}-${month}-${day}`;
     },
+    async fetchData() {
+      try {
+        this.isLoading = true;
+        const token = this.cookies.get("myCookie");
+        const response = await axios.get(`${this.API}/api/Complaints`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        this.isLoading = false;
+
+        return (this.complaints = response.data);
+      } catch (error) {
+        this.isLoading = false;
+        this.isErr = true;
+
+        this.msgError = "İşlem sırasında bir hata oluştu";
+      }
+    },
   },
 
   created() {
-    this.getComplaints();
+    this.fetchData();
   },
 };
 </script>
@@ -145,7 +198,6 @@ $table-header-border: 1px solid #fff;
       background-color: $header-background-color;
       color: $header-text-color;
       text-align: center !important;
-      // padding: 1em;
       &:first-child {
         display: table-cell;
         text-align: center;
@@ -204,4 +256,64 @@ $table-header-border: 1px solid #fff;
   $header-text-color: $table-header-text-color,
   $header-border: $table-header-border
 );
+
+$offset: 187;
+$duration: 1.4s;
+
+.spinner-container {
+  padding-top: 100px;
+}
+
+.spinner {
+  animation: rotator $duration linear infinite;
+}
+
+@keyframes rotator {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(270deg);
+  }
+}
+
+.path {
+  stroke-dasharray: $offset;
+  stroke-dashoffset: 0;
+  transform-origin: center;
+  animation: dash $duration ease-in-out infinite,
+    colors ($duration * 4) ease-in-out infinite;
+}
+
+@keyframes colors {
+  0% {
+    stroke: #4285f4;
+  }
+  25% {
+    stroke: #de3e35;
+  }
+  50% {
+    stroke: #f7c223;
+  }
+  75% {
+    stroke: #1b9a59;
+  }
+  100% {
+    stroke: #4285f4;
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dashoffset: $offset;
+  }
+  50% {
+    stroke-dashoffset: $offset/4;
+    transform: rotate(135deg);
+  }
+  100% {
+    stroke-dashoffset: $offset;
+    transform: rotate(450deg);
+  }
+}
 </style>
