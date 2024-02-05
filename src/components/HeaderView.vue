@@ -9,7 +9,7 @@
           <i class="fa-solid fa-phone fa-2xl text-primary"></i>
         </RouterLink>
         <button
-          class="navbar-toggler"
+          class="navbar-toggler text-light"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navbarSupportedContent"
@@ -17,7 +17,7 @@
           aria-expanded="false"
           aria-label="Toggle navigation"
         >
-          <span class="navbar-toggler-icon"></span>
+          <i class="fa-solid fa-bars fa-xl py-3"></i>
         </button>
         <div
           class="collapse navbar-collapse justify-content-end"
@@ -37,11 +37,14 @@
               >
             </li>
             <li v-if="!this.isAllow" class="nav-item">
-              <RouterLink class="nav-link" to="/">Giriş yapmak</RouterLink>
+              <RouterLink class="nav-link" to="/">Giriş yap</RouterLink>
             </li>
             <li v-if="!this.isAllow" class="nav-item">
-              <RouterLink class="nav-link" to="/createUser"
-                >Üye olmak</RouterLink
+              <RouterLink class="nav-link" to="/createUser">Üye ol</RouterLink>
+            </li>
+            <li class="nav-item" v-if="isManageAdmins">
+              <RouterLink class="nav-link" to="/manageAdmins"
+                >All Admins</RouterLink
               >
             </li>
             <li v-if="this.isAllow" class="nav-item">
@@ -69,6 +72,7 @@ export default {
     return {
       cookies: useCookies().cookies,
       isStaff: false,
+      isManageAdmins: false,
     };
   },
   methods: {
@@ -76,7 +80,7 @@ export default {
       swal(
         {
           title: "Emin misin?",
-          text: "Hesap silinecek",
+          text: "",
           type: "warning",
           showCancelButton: true,
           confirmButtonColor: "#DD6B55",
@@ -87,8 +91,13 @@ export default {
         },
         function (isConfirm) {
           if (isConfirm) {
-            useCookies().cookies.set("myCookie", "", { expires: new Date(0) });
+            useCookies().cookies.set("myCookie", "");
             useCookies().cookies.set("isStaff", "");
+            useCookies().cookies.set("manageAdmins", "");
+            useCookies().cookies.set("canAccept", "");
+            useCookies().cookies.set("canReject", "");
+            useCookies().cookies.set("canClose", "");
+            useCookies().cookies.set("canInProgress", "");
             location.replace("/");
           } else {
             swal("İptal edildi", "", "error");
@@ -103,9 +112,17 @@ export default {
         this.isStaff = false;
       }
     },
+    isSuperAdmin() {
+      if (this.cookies.get("manageAdmins") == "true") {
+        this.isManageAdmins = true;
+      } else {
+        this.isManageAdmins = false;
+      }
+    },
   },
   created() {
     this.isAdmin();
+    this.isSuperAdmin();
   },
 };
 </script>

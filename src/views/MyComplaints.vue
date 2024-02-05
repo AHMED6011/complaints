@@ -125,10 +125,9 @@ export default {
     async fetchData() {
       try {
         this.isLoading = true;
-        const token = this.cookies.get("myCookie");
         const response = await axios.get(`${this.API}/api/Complaints`, {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${this.isAllow}`,
             "Content-Type": "application/json",
           },
         });

@@ -32,80 +32,86 @@
           <div :class="IsStaff()">
             <button
               @click.prevent="accepted"
-              v-if="complaint.status === 0"
+              v-if="complaint.status === 0 && canAccept == true"
               class="btn m-2 text-light fw-bold bg-success"
             >
-              Kabul etmek
+              Kabul et
             </button>
             <button
               @click.prevent="rejected"
-              v-if="complaint.status === 0"
+              v-if="complaint.status === 0 && canReject == true"
               class="btn m-2 text-light fw-bold bg-danger"
             >
-              Reddetmek
+              Reddet
             </button>
             <button
               @click.prevent="inProgress"
-              v-if="complaint.status === 1"
+              v-if="complaint.status === 1 && canInProgress == true"
               class="btn m-2 text-light fw-bold bg-warning"
             >
-              Devam etmekte
+              Devam ediyor
             </button>
             <button
               @click.prevent="closed"
-              v-if="complaint.status === 3"
+              v-if="complaint.status === 3 && canClose == true"
               class="btn m-2 text-light fw-bold bg-dark"
             >
               Kapalı
             </button>
             <button
               @click.prevent="deleteComplaint"
-              v-if="complaint.status === 0"
+              v-if="
+                complaint.status === 0 &&
+                canAccept == true &&
+                canReject == true &&
+                canInProgress == true &&
+                canClose == true
+              "
               class="btn m-2 text-light fw-bold bg-danger"
             >
-              Kategoriyi Sil
+              Şikayet Sil
             </button>
           </div>
         </div>
         <div class="row">
           <div class="col-12 col-md-3 col-sm-6 text-center">
             <h4 class="my-4 fw-bold">Başlık</h4>
-            <p class="text-secondary">{{ complaint.title }}</p>
+            <p class="text-secondary text-break">{{ complaint.title }}</p>
           </div>
           <div class="col-12 col-md-3 col-sm-6 text-center">
             <h4 class="my-4 fw-bold">Tarih</h4>
-            <p class="text-secondary">
+            <p class="text-secondary text-break">
               {{ formatDate(complaint.createdDate) }}
             </p>
           </div>
           <div class="col-12 col-md-3 col-sm-6 text-center">
             <h4 class="my-4 fw-bold">Adres</h4>
-            <p class="text-secondary">{{ complaint.address }}</p>
+            <p class="text-secondary text-break">{{ complaint.address }}</p>
           </div>
           <div class="col-12 col-md-3 col-sm-6 text-center">
             <h4 class="my-4 fw-bold">Kategori</h4>
-            <p class="text-secondary">{{ complaint.category }}</p>
+            <p class="text-secondary text-break">{{ complaint.category }}</p>
           </div>
         </div>
         <div class="row">
           <div class="col-12 col-md-8 text-center desc">
-            <h4 class="my-4 fw-bold">Tanım</h4>
-            <p class="text-secondary">{{ complaint.description }}</p>
+            <h4 class="my-4 fw-bold">Açıklama</h4>
+            <p class="text-secondary text-break">{{ complaint.description }}</p>
           </div>
 
           <div class="col-12 col-md-4 text-center">
             <h4 class="my-4 fw-bold">Durum</h4>
-            <p class="text-secondary">
+            <p class="text-secondary text-break">
               {{ getStatusMessage(complaint.status) }}
             </p>
           </div>
         </div>
         <div class="row border-0 mt-4 justify-content-center">
           <div class="col-6 text-center">
-            <h3 class="my-4 fw-bold">Kütükler</h3>
+            <h3 class="my-4 fw-bold">Geçimiş</h3>
             <ul class="list-group" v-for="log in complaint.logs" :key="log.id">
               <li
-                class="list-group-item text-secondary d-flex justify-content-around border-0 text-start"
+                class="list-group-item text-secondary text-break d-flex justify-content-around border-0 text-start"
               >
                 <span> {{ log.logText }} </span>
                 <span> {{ formatDate(log.logDate) }} </span>
@@ -172,13 +178,17 @@ export default {
       imageFile: null,
       msg: "",
       cookies: useCookies().cookies,
+      canAccept: useCookies().cookies.get("canAccept"),
+      canReject: useCookies().cookies.get("canReject"),
+      canInProgress: useCookies().cookies.get("canInProgress"),
+      canClose: useCookies().cookies.get("canClose"),
     };
   },
   methods: {
     selectedImg(event) {
       this.imageFile = event.target.files[0].name;
     },
-    async getComplaints() {
+    async getComplaint() {
       try {
         const response = await axios.get(
           `${this.API}/api/Complaints/${this.id}`,
@@ -295,7 +305,13 @@ export default {
     },
 
     IsStaff() {
-      if (this.cookies.get("isStaff") == "true") {
+      if (
+        this.cookies.get("isStaff") == "true" &&
+        this.canAccept == true &&
+        this.canReject == true &&
+        this.canInProgress == true &&
+        this.canClose == true
+      ) {
         return "d-flex";
       }
       return "d-none";
@@ -304,7 +320,7 @@ export default {
   created() {
     this.isAdmin = this.cookies.get("isStaff");
     console.log(this.isAdmin);
-    this.getComplaints();
+    this.getComplaint();
     this.isAllow;
   },
 };

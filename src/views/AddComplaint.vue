@@ -109,7 +109,7 @@
               </div>
               <div class="col-8">
                 <button class="btn btn-primary" @click.prevent="addComplaint">
-                  Açıklama
+                  Gönder
                 </button>
               </div>
             </form>

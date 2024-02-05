@@ -75,11 +75,14 @@ export default {
       const date = new Date(dateString);
       const hours = date.getHours();
       const minutes = date.getMinutes();
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, "0");
+      const day = date.getDate().toString().padStart(2, "0");
 
       const formattedHours = hours < 10 ? `0${hours}` : hours;
       const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
 
-      return `${formattedHours}:${formattedMinutes}`;
+      return `${year}/${month}/${day} ${formattedHours}:${formattedMinutes}`;
     },
     getClass(userID) {
       return userID == this.complaint.userId
@@ -152,6 +155,10 @@ export default {
 
 .clearfix {
   clear: both;
+
+  small {
+    font-size: 12px;
+  }
 }
 
 ::-webkit-scrollbar-track {

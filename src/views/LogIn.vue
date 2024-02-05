@@ -52,7 +52,7 @@
         <button id="button" @click.prevent="logIn">Giriş yap</button>
         <div class="signupContainer">
           <p>Hiç hesabınız yok mu?</p>
-          <RouterLink to="/createUser">Üye olmak</RouterLink>
+          <RouterLink to="/createUser">Üye ol</RouterLink>
         </div>
       </form>
     </div>
@@ -88,6 +88,11 @@ export default {
         );
         this.cookies.set("myCookie", response.data.token);
         this.cookies.set("isStaff", response.data.isStaff);
+        this.cookies.set("manageAdmins", response.data.manageAdmins);
+        this.cookies.set("canAccept", response.data.canAccept);
+        this.cookies.set("canReject", response.data.canReject);
+        this.cookies.set("canClose", response.data.canClose);
+        this.cookies.set("canInProgress", response.data.canInProgress);
         Swal.fire({
           icon: "success",
           title: "başarıyla oturum açtınız",
