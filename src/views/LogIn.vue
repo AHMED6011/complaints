@@ -93,6 +93,7 @@ export default {
         this.cookies.set("canReject", response.data.canReject);
         this.cookies.set("canClose", response.data.canClose);
         this.cookies.set("canInProgress", response.data.canInProgress);
+        this.cookies.set("userID", response.data.userID);
         Swal.fire({
           icon: "success",
           title: "başarıyla oturum açtınız",

@@ -44,7 +44,7 @@
             </li>
             <li class="nav-item" v-if="isManageAdmins">
               <RouterLink class="nav-link" to="/manageAdmins"
-                >All Admins</RouterLink
+                >Tüm Yöneticiler</RouterLink
               >
             </li>
             <li v-if="this.isAllow" class="nav-item">
@@ -98,6 +98,7 @@ export default {
             useCookies().cookies.set("canReject", "");
             useCookies().cookies.set("canClose", "");
             useCookies().cookies.set("canInProgress", "");
+            useCookies().cookies.set("userID", "");
             location.replace("/");
           } else {
             swal("İptal edildi", "", "error");

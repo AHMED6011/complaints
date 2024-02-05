@@ -71,6 +71,10 @@
               class="btn btn-primary"
               data-bs-toggle="modal"
               data-bs-target="#staticBackdrop"
+              :class="{
+                'd-none': admin.id === userID,
+                'd-inline': admin.id !== userID,
+              }"
               @click="getAdminData(admin)"
             >
               edit
@@ -131,7 +135,7 @@
                           id="validationCustom0"
                           class="form-select mb-3"
                           aria-label="Default select example"
-                          v-model="category"
+                          v-model="selectedAdmin.category"
                           title="Kategori seç"
                         >
                           <option value="" disabled selected>
@@ -254,6 +258,7 @@
 
 <script>
 import axios from "axios";
+import { useCookies } from "vue3-cookies";
 import CreateAdmins from "@/components/CreateAdmins.vue";
 
 export default {
@@ -266,6 +271,7 @@ export default {
       name: "",
       email: "",
       phoneNumber: "",
+      userID: useCookies().cookies.get("userID"),
       status: [
         { state: false, text: "Reddedildi" },
         { state: false, text: "Kabul edildi" },
@@ -319,21 +325,6 @@ export default {
 
     async updateData() {
       try {
-        const updatedData = {
-          password: "",
-        };
-
-        // this.category && (updatedData.category = this.category);
-        // this.name && (updatedData.name = this.name);
-        // this.name && (updatedData.userName = this.name);
-        // this.email && (updatedData.email = this.email);
-        // this.phoneNumber && (updatedData.phoneNumber = this.phoneNumber);
-        // this.canAccept && (updatedData.canAccept = this.canAccept);
-        // this.canReject && (updatedData.canReject = this.canReject);
-        // this.canClose && (updatedData.canClose = this.canClose);
-        // this.canInProgress && (updatedData.canInProgress = this.canInProgress);
-        // this.manageAdmins && (updatedData.manageAdmins = this.manageAdmins);
-
         this.selectedAdmin.password = "";
 
         const response = await axios.put(
