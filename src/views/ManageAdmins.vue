@@ -71,7 +71,7 @@
               class="btn btn-primary"
               data-bs-toggle="modal"
               data-bs-target="#staticBackdrop"
-              @click="getAdminID(admin.id)"
+              @click="getAdminData(admin)"
             >
               edit
             </button>
@@ -95,7 +95,6 @@
                       class="btn-close"
                       data-bs-dismiss="modal"
                       aria-label="Close"
-                      @click="cancelButton()"
                     ></button>
                   </div>
                   <div class="modal-body">
@@ -103,7 +102,7 @@
                       <div class="row mb-3">
                         <input
                           type="text"
-                          v-model="name"
+                          v-model="selectedAdmin.name"
                           placeholder="Kullanıcı adı"
                           autocomplete="off"
                           class="form-control"
@@ -112,7 +111,7 @@
                       <div class="row mb-3">
                         <input
                           type="email"
-                          v-model="email"
+                          v-model="selectedAdmin.email"
                           autocomplete="off"
                           placeholder="e-posta"
                           class="form-control"
@@ -122,8 +121,8 @@
                         <input
                           type="text"
                           autocomplete="off"
-                          v-model="phoneNumber"
-                          placeholder="Telefon numarası"
+                          v-model="selectedAdmin.phoneNumber"
+                          :placeholder="selectedAdmin.phoneNumber"
                           class="form-control"
                         />
                       </div>
@@ -135,7 +134,9 @@
                           v-model="category"
                           title="Kategori seç"
                         >
-                          <option disabled selected>Kategori seç</option>
+                          <option value="" disabled selected>
+                            Kategori seç
+                          </option>
                           <option value="Tüm">Tüm</option>
                           <option value="Yol ve çevre düzeni">
                             Yol ve çevre düzeni
@@ -150,24 +151,76 @@
                           <option value="Diğer">Diğer</option>
                         </select>
                       </div>
-                      <div class="row mb-3">
+                      <div class="row mb-3 justify-content-center">
                         <h3 class="mb-4">İzin ver</h3>
-                        <div
-                          class="col-2 mx-2 p-0"
-                          v-for="(state, index) in status"
-                          :key="index"
-                        >
+                        <div class="col-2 mx-2 p-0">
                           <input
                             type="checkbox"
                             class="btn-check"
-                            :id="`${index}`"
+                            :id="`${selectedAdmin.id}1`"
                             autocomplete="off"
-                            @click="getStatus(index)"
+                            v-model="selectedAdmin.canReject"
                           />
                           <label
                             class="btn btn-outline-primary"
-                            :for="`${index}`"
-                            >{{ state.text }}</label
+                            :for="`${selectedAdmin.id}1`"
+                            >Reddedildi
+                          </label>
+                        </div>
+                        <div class="col-2 mx-2 p-0">
+                          <input
+                            type="checkbox"
+                            class="btn-check"
+                            :id="`${selectedAdmin.id}2`"
+                            autocomplete="off"
+                            v-model="selectedAdmin.canAccept"
+                          />
+                          <label
+                            class="btn btn-outline-primary"
+                            :for="`${selectedAdmin.id}2`"
+                            >Kabul edildi</label
+                          >
+                        </div>
+                        <div class="col-2 mx-2 p-0">
+                          <input
+                            type="checkbox"
+                            class="btn-check"
+                            :id="`${selectedAdmin.id}3`"
+                            autocomplete="off"
+                            v-model="selectedAdmin.canInProgress"
+                          />
+                          <label
+                            class="btn btn-outline-primary"
+                            :for="`${selectedAdmin.id}3`"
+                            >Devam ediyor</label
+                          >
+                        </div>
+                        <div class="col-2 mx-2 p-0">
+                          <input
+                            type="checkbox"
+                            class="btn-check"
+                            :id="`${selectedAdmin.id}4`"
+                            autocomplete="off"
+                            v-model="selectedAdmin.canClose"
+                          />
+                          <label
+                            class="btn btn-outline-primary"
+                            :for="`${selectedAdmin.id}4`"
+                            >Tamamlandı</label
+                          >
+                        </div>
+                        <div class="col-2 mx-2 p-0">
+                          <input
+                            type="checkbox"
+                            class="btn-check"
+                            :id="`${selectedAdmin.id}5`"
+                            autocomplete="off"
+                            v-model="selectedAdmin.manageAdmins"
+                          />
+                          <label
+                            class="btn btn-outline-primary"
+                            :for="`${selectedAdmin.id}5`"
+                            >Yönetici</label
                           >
                         </div>
                       </div>
@@ -178,7 +231,6 @@
                       type="button"
                       class="btn btn-secondary"
                       data-bs-dismiss="modal"
-                      @click="cancelButton()"
                     >
                       İptal et
                     </button>
@@ -209,6 +261,7 @@ export default {
   data() {
     return {
       admins: [],
+      selectedAdmin: {},
       category: "",
       name: "",
       email: "",
@@ -220,11 +273,6 @@ export default {
         { state: false, text: "Tamamlandı" },
         { state: false, text: "Yönetici Yöneticileri" },
       ],
-      canAccept: false,
-      canReject: false,
-      canClose: false,
-      canInProgress: false,
-      manageAdmins: false,
       id: "",
     };
   },
@@ -243,41 +291,7 @@ export default {
         console.log(error);
       }
     },
-    async updateData() {
-      try {
-        const updatedData = {
-          password: "",
-        };
 
-        this.category && (updatedData.category = this.category);
-        this.name && (updatedData.name = this.name);
-        this.name && (updatedData.userName = this.name);
-        this.email && (updatedData.email = this.email);
-        this.phoneNumber && (updatedData.phoneNumber = this.phoneNumber);
-        this.canAccept && (updatedData.canAccept = this.canAccept);
-        this.canReject && (updatedData.canReject = this.canReject);
-        this.canClose && (updatedData.canClose = this.canClose);
-        this.canInProgress && (updatedData.canInProgress = this.canInProgress);
-        this.manageAdmins && (updatedData.manageAdmins = this.manageAdmins);
-
-        const response = await axios.put(
-          `${this.API}/api/Users/${this.id}`,
-
-          updatedData,
-          {
-            headers: {
-              Authorization: `Bearer ${this.isAllow}`,
-              "Content-type": "application/json",
-            },
-          }
-        );
-
-        location.reload();
-        console.log(response);
-      } catch (error) {
-        console.log(error);
-      }
-    },
     getStatus(index) {
       if (index == 0) {
         this.canAccept = !this.canAccept;
@@ -297,8 +311,48 @@ export default {
       }
     },
 
-    getAdminID(adminId) {
-      this.id = adminId;
+    getAdminData(adminData) {
+      this.selectedAdmin = adminData;
+      this.id = adminData.id;
+      console.log(adminData.phoneNumber);
+    },
+
+    async updateData() {
+      try {
+        const updatedData = {
+          password: "",
+        };
+
+        // this.category && (updatedData.category = this.category);
+        // this.name && (updatedData.name = this.name);
+        // this.name && (updatedData.userName = this.name);
+        // this.email && (updatedData.email = this.email);
+        // this.phoneNumber && (updatedData.phoneNumber = this.phoneNumber);
+        // this.canAccept && (updatedData.canAccept = this.canAccept);
+        // this.canReject && (updatedData.canReject = this.canReject);
+        // this.canClose && (updatedData.canClose = this.canClose);
+        // this.canInProgress && (updatedData.canInProgress = this.canInProgress);
+        // this.manageAdmins && (updatedData.manageAdmins = this.manageAdmins);
+
+        this.selectedAdmin.password = "";
+
+        const response = await axios.put(
+          `${this.API}/api/Users/${this.id}`,
+
+          this.selectedAdmin,
+          {
+            headers: {
+              Authorization: `Bearer ${this.isAllow}`,
+              "Content-type": "application/json",
+            },
+          }
+        );
+
+        location.reload();
+        console.log(response);
+      } catch (error) {
+        console.log(error);
+      }
     },
 
     cancelButton() {
