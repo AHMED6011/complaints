@@ -29,6 +29,7 @@
               class="btn-close"
               data-bs-dismiss="modal"
               aria-label="Close"
+              @click.prevent="cancelButton()"
             ></button>
           </div>
           <div class="modal-body">
@@ -53,7 +54,7 @@
               </div>
               <div class="mb-3 row">
                 <input
-                  type="number"
+                  type="text"
                   autocomplete="off"
                   v-model="phoneNumber"
                   placeholder="Telefon numarası"
@@ -84,25 +85,18 @@
                 </select>
               </div>
               <div class="mb-3 row">
-                <input
-                  type="password"
-                  autocomplete="off"
-                  v-model="password"
-                  placeholder="Şifre"
-                  class="form-control"
-                  required
-                />
+                <form class="p-0" autocomplete="off">
+                  <input
+                    type="password"
+                    autocomplete="new-passwor"
+                    v-model="password"
+                    placeholder="Şifre"
+                    class="form-control"
+                    required
+                  />
+                </form>
               </div>
-              <div class="mb-3 row">
-                <input
-                  type="number"
-                  autocomplete="off"
-                  v-model="tc"
-                  placeholder="Kimlik numarası"
-                  required
-                  class="form-control"
-                />
-              </div>
+
               <div class="mb-3 row justify-content-center">
                 <h3 class="mb-4">İzin ver</h3>
 
@@ -150,6 +144,8 @@
 
 <script>
 import axios from "axios";
+import Swal from "sweetalert2";
+
 export default {
   props: {
     id: String,
@@ -164,13 +160,12 @@ export default {
       email: "",
       password: "",
       phoneNumber: "",
-      tc: "",
       status: [
         { state: false, text: "Reddedildi" },
         { state: false, text: "Kabul edildi" },
         { state: false, text: "Devam ediyor" },
         { state: false, text: "Tamamlandı" },
-        { state: false, text: "Yönetici Yöneticileri" },
+        { state: false, text: "Yönetici" },
       ],
       canAccept: false,
       canReject: false,
@@ -183,22 +178,62 @@ export default {
     getStatus(index) {
       if (index == 0) {
         this.canAccept = !this.canAccept;
-        console.log(this.canAccept);
       } else if (index == 1) {
         this.canReject = !this.canReject;
-        console.log(this.canReject);
       } else if (index == 2) {
         this.canClose = !this.canClose;
-        console.log(this.canClose);
       } else if (index == 3) {
         this.canInProgress = !this.canInProgress;
-        console.log(this.canInProgress);
       } else if (index == 4) {
         this.manageAdmins = !this.manageAdmins;
-        console.log(this.manageAdmins);
       }
     },
     async addNewAdmin() {
+      if (
+        !this.name.trim() ||
+        !this.phoneNumber.trim() ||
+        !this.password.trim() ||
+        !this.email.trim()
+      ) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Lütfen tüm alanları doldurun",
+        });
+        return;
+      }
+
+      if (!this.email.includes("@")) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Geçerli bir e-posta adresi giriniz",
+        });
+        return;
+      }
+
+      if (!/^\d+$/.test(this.phoneNumber.trim())) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Telefon numarası yalnızca rakamlar içermelidir",
+        });
+        return;
+      }
+
+      if (
+        this.name.trim().length < 1 ||
+        this.phoneNumber.trim().length < 6 ||
+        this.password.trim().length < 6 ||
+        this.email.trim().length < 6
+      ) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Her alan en az 6 karakter içermelidir",
+        });
+        return;
+      }
       try {
         const createAdmin = {
           name: this.name,
@@ -209,9 +244,9 @@ export default {
           canReject: this.canReject,
           canClose: this.canClose,
           canInProgress: this.canInProgress,
-          tc: this.tc,
           email: this.email,
         };
+
         const response = await axios.post(
           `${this.API}/api/Users`,
           createAdmin,
@@ -222,9 +257,19 @@ export default {
             },
           }
         );
+
+        location.reload();
       } catch (error) {
         console.log(error);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: `${error}`,
+        });
       }
+    },
+    cancelButton() {
+      location.reload();
     },
   },
 

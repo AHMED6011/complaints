@@ -31,41 +31,41 @@
           </h1>
           <div :class="IsStaff()">
             <button
-              @click.prevent="accepted"
-              v-if="complaint.status === 0 && canAccept == true"
+              @click.prevent="accepted()"
+              v-if="complaint.status === 0 && canAccept == 'true'"
               class="btn m-2 text-light fw-bold bg-success"
             >
               Kabul et
             </button>
             <button
-              @click.prevent="rejected"
-              v-if="complaint.status === 0 && canReject == true"
+              @click.prevent="rejected()"
+              v-if="complaint.status === 0 && canReject == 'true'"
               class="btn m-2 text-light fw-bold bg-danger"
             >
               Reddet
             </button>
             <button
-              @click.prevent="inProgress"
-              v-if="complaint.status === 1 && canInProgress == true"
+              @click.prevent="inProgress()"
+              v-if="complaint.status === 1 && canInProgress == 'true'"
               class="btn m-2 text-light fw-bold bg-warning"
             >
               Devam ediyor
             </button>
             <button
-              @click.prevent="closed"
-              v-if="complaint.status === 3 && canClose == true"
+              @click.prevent="closed()"
+              v-if="complaint.status === 3 && canClose == 'true'"
               class="btn m-2 text-light fw-bold bg-dark"
             >
-              Kapalı
+              Tamamlandı
             </button>
             <button
-              @click.prevent="deleteComplaint"
+              @click.prevent="deleteComplaint()"
               v-if="
                 complaint.status === 0 &&
-                canAccept == true &&
-                canReject == true &&
-                canInProgress == true &&
-                canClose == true
+                canAccept == 'true' &&
+                canReject == 'true' &&
+                canInProgress == 'true' &&
+                canClose == 'true'
               "
               class="btn m-2 text-light fw-bold bg-danger"
             >
@@ -177,7 +177,7 @@ export default {
       title: "",
       imageFile: null,
       msg: "",
-      cookies: useCookies().cookies,
+      isStaff: useCookies().cookies.get("isStaff"),
       canAccept: useCookies().cookies.get("canAccept"),
       canReject: useCookies().cookies.get("canReject"),
       canInProgress: useCookies().cookies.get("canInProgress"),
@@ -201,7 +201,11 @@ export default {
         );
         this.complaint = response.data;
       } catch (err) {
-        console.log(err);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: `${error.response.data}`,
+        });
       }
     },
     async deleteComplaint() {
@@ -213,7 +217,11 @@ export default {
         });
         location.replace("/complaints");
       } catch (error) {
-        console.error("An error occurred while deleting the complaint:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: `${error.response.data}`,
+        });
       }
     },
     async accepted() {
@@ -272,7 +280,7 @@ export default {
     },
     getStatusMessage(status) {
       if (status === 0) {
-        return "Şikayet alındı";
+        return "Onay bekleniyor";
       } else if (status === 1) {
         return "Kabul edildi";
       } else if (status === 2) {
@@ -298,19 +306,21 @@ export default {
     },
     formatDate(dateString) {
       const date = new Date(dateString);
+      const hours = date.getHours();
+      const minutes = date.getMinutes();
       const year = date.getFullYear();
       const month = (date.getMonth() + 1).toString().padStart(2, "0");
       const day = date.getDate().toString().padStart(2, "0");
-      return `${year}-${month}-${day}`;
+      return `${year}-${month}-${day} ${hours}:${minutes}`;
     },
 
     IsStaff() {
       if (
-        this.cookies.get("isStaff") == "true" &&
-        this.canAccept == true &&
-        this.canReject == true &&
-        this.canInProgress == true &&
-        this.canClose == true
+        this.isStaff == "true" &&
+        this.canAccept == "true" &&
+        this.canReject == "true" &&
+        this.canInProgress == "true" &&
+        this.canClose == "true"
       ) {
         return "d-flex";
       }
@@ -318,7 +328,7 @@ export default {
     },
   },
   created() {
-    this.isAdmin = this.cookies.get("isStaff");
+    this.isAdmin = this.isStaff;
     console.log(this.isAdmin);
     this.getComplaint();
     this.isAllow;

@@ -88,14 +88,18 @@
                   d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"
                 ></path>
               </svg>
-              <input
-                placeholder="Şifre"
-                v-model="password"
-                id="password"
-                class="inputField"
-                type="password"
-                required
-              />
+
+              <form class="p-0" autocomplete="off">
+                <input
+                  placeholder="Şifre"
+                  v-model="password"
+                  autocomplete="new-passwor"
+                  id="password"
+                  class="inputField"
+                  type="password"
+                  required
+                />
+              </form>
             </div>
           </div>
           <div class="col-6">
@@ -152,6 +156,63 @@ export default {
   },
   methods: {
     async createUser() {
+      if (
+        !this.name.trim() ||
+        !this.phoneNumber.trim() ||
+        !this.password.trim() ||
+        !this.tc.trim() ||
+        !this.email.trim()
+      ) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Lütfen tüm alanları doldurun",
+        });
+        return;
+      }
+
+      if (!this.email.includes("@")) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Geçerli bir e-posta adresi giriniz",
+        });
+        return;
+      }
+
+      if (!/^\d+$/.test(this.phoneNumber.trim())) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Telefon numarası yalnızca rakamlar içermelidir",
+        });
+        return;
+      }
+
+      if (!/^\d+$/.test(this.tc.trim())) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Kimlik numarası yalnızca rakam içermelidir",
+        });
+        return;
+      }
+
+      if (
+        this.name.trim().length < 1 ||
+        this.phoneNumber.trim().length < 6 ||
+        this.password.trim().length < 6 ||
+        this.tc.trim().length < 6 ||
+        this.email.trim().length < 6
+      ) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Her alan en az 6 karakter içermelidir",
+        });
+        return;
+      }
+
       try {
         const register = {
           name: this.name.trim(),
@@ -160,6 +221,7 @@ export default {
           tc: this.tc.trim(),
           email: this.email.trim(),
         };
+
         const response = await axios.post(
           `${this.API}/api/Users/SignUp`,
           register,
@@ -169,6 +231,7 @@ export default {
             },
           }
         );
+
         if (response.status === 200) {
           this.cookies.set("myCookie", response.data.token);
           this.cookies.set("isStaff", response.data.isStaff);
@@ -189,11 +252,10 @@ export default {
           });
         }
       } catch (error) {
-        console.log(error);
         Swal.fire({
           icon: "error",
           title: "Oops...",
-          text: "Bir şeyler yanlış gitti",
+          text: `${error.response.data}`,
         });
       }
     },

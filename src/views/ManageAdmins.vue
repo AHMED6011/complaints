@@ -4,7 +4,7 @@
       <div class="row justify-content-center align-items-center">
         <div class="col-6">
           <h1 class="text-primary text-center fw-bold py-4">
-            Yöneticileri Yönet
+            Yöneticileri Sayfasi
           </h1>
         </div>
         <div class="col-6 text-center">
@@ -71,13 +71,15 @@
               class="btn btn-primary"
               data-bs-toggle="modal"
               data-bs-target="#staticBackdrop"
-              :class="{
-                'd-none': admin.id === userID,
-                'd-inline': admin.id !== userID,
-              }"
               @click="getAdminData(admin)"
             >
-              edit
+              Düzenleme
+            </button>
+            <button
+              class="btn mx-2 btn-danger"
+              @click="deleteAcount(admin.id, this.API, this.isAllow)"
+            >
+              Sil
             </button>
             <div
               class="modal fade"
@@ -130,7 +132,10 @@
                           class="form-control"
                         />
                       </div>
-                      <div class="row mb-3">
+                      <div
+                        class="row mb-3"
+                        :style="{ display: checkAdminID(selectedAdmin.id) }"
+                      >
                         <select
                           id="validationCustom0"
                           class="form-select mb-3"
@@ -155,7 +160,10 @@
                           <option value="Diğer">Diğer</option>
                         </select>
                       </div>
-                      <div class="row mb-3 justify-content-center">
+                      <div
+                        class="row mb-3 justify-content-center"
+                        :style="{ display: checkAdminID(selectedAdmin.id) }"
+                      >
                         <h3 class="mb-4">İzin ver</h3>
                         <div class="col-2 mx-2 p-0">
                           <input
@@ -243,7 +251,7 @@
                       class="btn btn-primary"
                       @click="updateData()"
                     >
-                      Veriyi güncelle
+                      Güncelle
                     </button>
                   </div>
                 </div>
@@ -260,6 +268,7 @@
 import axios from "axios";
 import { useCookies } from "vue3-cookies";
 import CreateAdmins from "@/components/CreateAdmins.vue";
+import Swal from "sweetalert2";
 
 export default {
   components: { CreateAdmins },
@@ -271,7 +280,8 @@ export default {
       name: "",
       email: "",
       phoneNumber: "",
-      userID: useCookies().cookies.get("userID"),
+      cookies: useCookies().cookies,
+      userID: "",
       status: [
         { state: false, text: "Reddedildi" },
         { state: false, text: "Kabul edildi" },
@@ -294,7 +304,11 @@ export default {
 
         this.admins = response.data;
       } catch (error) {
-        console.log(error);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: `${error.response.data}`,
+        });
       }
     },
 
@@ -320,7 +334,62 @@ export default {
     getAdminData(adminData) {
       this.selectedAdmin = adminData;
       this.id = adminData.id;
-      console.log(adminData.phoneNumber);
+    },
+
+    checkAdminID(adminid) {
+      if (adminid === this.userID) {
+        return "none";
+      } else {
+        return "flex";
+      }
+    },
+
+    deleteAcount(id, API, token) {
+      try {
+        swal(
+          {
+            title: "Emin misin?",
+            text: "",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "evet",
+            cancelButtonText: "iptal",
+            closeOnConfirm: false,
+            closeOnCancel: true,
+            API: this.API,
+          },
+          async function (isConfirm) {
+            if (isConfirm) {
+              const response = await axios.delete(`${API}/api/Users/${id}`, {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+              });
+
+              if (useCookies().cookies.get("userID") === id) {
+                this.cookies.set("myCookie", "");
+                this.cookies.set("isStaff", "");
+                this.cookies.set("manageAdmins", "");
+                this.cookies.set("canAccept", "");
+                this.cookies.set("canReject", "");
+                this.cookies.set("canClose", "");
+                this.cookies.set("canInProgress", "");
+                this.cookies.set("userID", "");
+                location.replace("/");
+              }
+            }
+            location.reload();
+          }
+        );
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: `${error.response.data}`,
+        });
+      }
     },
 
     async updateData() {
@@ -340,18 +409,18 @@ export default {
         );
 
         location.reload();
-        console.log(response);
       } catch (error) {
-        console.log(error);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: `${error.response.data}`,
+        });
       }
     },
-
-    cancelButton() {
-      location.reload();
-    },
   },
-  created() {
+  mounted() {
     this.getAdmins();
+    this.userID = this.cookies.get("userID");
   },
 };
 </script>

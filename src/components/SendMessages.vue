@@ -27,9 +27,10 @@
           class="form-control input-sm"
           placeholder="Mesajınızı buraya yazın..."
           v-model="msg"
+          @keydown.enter="sendMessages()"
         />
         <span class="input-group-btn">
-          <button class="btn btn-primary" id="btn-chat" @click="sendMessages">
+          <button class="btn btn-primary" id="btn-chat" @click="sendMessages()">
             Gönder
           </button>
         </span>
@@ -54,6 +55,9 @@ export default {
   },
   methods: {
     async sendMessages() {
+      if (this.msg === "") {
+        return;
+      }
       const messages = {
         complaintId: this.complaint.id,
         message: this.msg,

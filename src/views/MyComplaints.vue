@@ -91,7 +91,7 @@ export default {
   methods: {
     getStatusMessage(status) {
       if (status === 0) {
-        return "Askıda olması";
+        return "onay bekleniyor";
       } else if (status === 1) {
         return "Kabul edilmiş";
       } else if (status === 2) {
@@ -99,7 +99,7 @@ export default {
       } else if (status === 3) {
         return "Devam etmekte";
       } else {
-        return "Kapalı";
+        return "Tamamlandı";
       }
     },
     getStatusColor(status) {
@@ -133,7 +133,7 @@ export default {
         });
         this.isLoading = false;
 
-        return (this.complaints = response.data);
+        this.complaints = response.data;
       } catch (error) {
         this.isLoading = false;
         this.isErr = true;
@@ -143,7 +143,8 @@ export default {
     },
   },
 
-  created() {
+  mounted() {
+    console.log(this.complaints);
     this.fetchData();
   },
 };

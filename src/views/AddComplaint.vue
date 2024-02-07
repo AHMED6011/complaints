@@ -166,8 +166,6 @@ export default {
         },
       });
 
-      console.log(responseImg);
-
       const sendData = {
         userId: "",
         category: this.category,
@@ -178,16 +176,12 @@ export default {
       };
 
       try {
-        const response = await axios.post(
-          `${this.API}/api/Complaints`,
-          sendData,
-          {
-            headers: {
-              Authorization: `Bearer ${this.isAllow}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        await axios.post(`${this.API}/api/Complaints`, sendData, {
+          headers: {
+            Authorization: `Bearer ${this.isAllow}`,
+            "Content-Type": "application/json",
+          },
+        });
 
         swal(
           {
@@ -210,11 +204,13 @@ export default {
         this.address = "";
         this.title = "";
         this.imageFile = "";
+        this.imageName = "";
       } catch (error) {
-        console.error(
-          "An error occurred during the complaint addition:",
-          error
-        );
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: `${error.response.data}`,
+        });
       }
     },
   },

@@ -36,12 +36,6 @@
                 >Şikayet Ekle</RouterLink
               >
             </li>
-            <li v-if="!this.isAllow" class="nav-item">
-              <RouterLink class="nav-link" to="/">Giriş yap</RouterLink>
-            </li>
-            <li v-if="!this.isAllow" class="nav-item">
-              <RouterLink class="nav-link" to="/createUser">Üye ol</RouterLink>
-            </li>
             <li class="nav-item" v-if="isManageAdmins">
               <RouterLink class="nav-link" to="/manageAdmins"
                 >Tüm Yöneticiler</RouterLink
@@ -87,7 +81,7 @@ export default {
           confirmButtonText: "evet",
           cancelButtonText: "iptal",
           closeOnConfirm: false,
-          closeOnCancel: false,
+          closeOnCancel: true,
         },
         function (isConfirm) {
           if (isConfirm) {
@@ -100,12 +94,11 @@ export default {
             useCookies().cookies.set("canInProgress", "");
             useCookies().cookies.set("userID", "");
             location.replace("/");
-          } else {
-            swal("İptal edildi", "", "error");
           }
         }
       );
     },
+
     isAdmin() {
       if (this.cookies.get("isStaff") == "true") {
         this.isStaff = true;

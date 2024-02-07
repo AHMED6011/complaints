@@ -92,7 +92,7 @@ export default {
   methods: {
     getStatusMessage(status) {
       if (status === 0) {
-        return "Şikayet alındı";
+        return "onay bekleniyor";
       } else if (status === 1) {
         return "Kabul edildi";
       } else if (status === 2) {
