@@ -22,7 +22,7 @@
                   placeholder=" Adres"
                   class="form-control adres-input"
                   id="validationCustom1"
-                  autocomplete="off"
+                  autocomplete="new-password"
                   v-model="address"
                   required
                 ></textarea>
@@ -32,7 +32,7 @@
                   placeholder="Başlık"
                   class="form-control my-3"
                   id="validationCustom2"
-                  autocomplete="off"
+                  autocomplete="new-password"
                   v-model="title"
                   required
                 />
@@ -103,7 +103,7 @@
                   placeholder="Şikayetiniz"
                   id="validationCustom3"
                   v-model="desc"
-                  autocomplete="off"
+                  autocomplete="new-password"
                   required
                 ></textarea>
               </div>
@@ -138,11 +138,6 @@ export default {
     selectedImg(event) {
       this.imageFile = event.target.files[0];
       this.imageName = event.target.files[0].name;
-      if (event && this.imageFile(event)) {
-        console.log("Selected image file:", event);
-      } else {
-        console.warn("Please select a valid image file.");
-      }
     },
     async addComplaint() {
       if (
@@ -157,7 +152,6 @@ export default {
 
       const formData = new FormData();
       formData.append("files", this.imageFile, this.imageFile.name);
-      console.log(this.imageFile.name);
 
       const responseImg = await axios.post(`${this.API}/api/Files`, formData, {
         headers: {

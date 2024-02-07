@@ -12,11 +12,10 @@ const router = createRouter({
       path: "/AddComplaint",
       name: "AddComplaint",
       beforeEnter: (to, from, next) => {
-        if (isStaff == "false") {
+        if (isStaff == "false" || isAllowed) {
           next();
         } else {
           next("/");
-          9;
         }
       },
       component: () => import("../views/AddComplaint.vue"),
@@ -25,10 +24,10 @@ const router = createRouter({
       path: "/ComplaintDetails/:id",
       name: "ComplaintDetails",
       beforeEnter: (to, from, next) => {
-        if (!isAllowed) {
-          next("/");
-        } else {
+        if (isAllowed) {
           next();
+        } else {
+          next("/");
         }
       },
       component: () => import("../views/ComplaintDetails.vue"),
@@ -52,12 +51,10 @@ const router = createRouter({
       path: "/createUser",
       name: "createUser",
       beforeEnter: (to, from, next) => {
-        if (isStaff === "true") {
-          next("/admin");
-        } else if (isAllowed) {
-          next("/complaints");
-        } else {
+        if (!isAllowed) {
           next();
+        } else {
+          next("/");
         }
       },
       component: () => import("../views/CreateUser.vue"),

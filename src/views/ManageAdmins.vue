@@ -110,7 +110,7 @@
                           type="text"
                           v-model="selectedAdmin.name"
                           placeholder="Kullanıcı adı"
-                          autocomplete="off"
+                          autocomplete="new-password"
                           class="form-control"
                         />
                       </div>
@@ -118,7 +118,7 @@
                         <input
                           type="email"
                           v-model="selectedAdmin.email"
-                          autocomplete="off"
+                          autocomplete="new-password"
                           placeholder="e-posta"
                           class="form-control"
                         />
@@ -126,7 +126,7 @@
                       <div class="row mb-3">
                         <input
                           type="text"
-                          autocomplete="off"
+                          autocomplete="new-password"
                           v-model="selectedAdmin.phoneNumber"
                           :placeholder="selectedAdmin.phoneNumber"
                           class="form-control"
@@ -170,7 +170,7 @@
                             type="checkbox"
                             class="btn-check"
                             :id="`${selectedAdmin.id}1`"
-                            autocomplete="off"
+                            autocomplete="new-password"
                             v-model="selectedAdmin.canReject"
                           />
                           <label
@@ -184,7 +184,7 @@
                             type="checkbox"
                             class="btn-check"
                             :id="`${selectedAdmin.id}2`"
-                            autocomplete="off"
+                            autocomplete="new-password"
                             v-model="selectedAdmin.canAccept"
                           />
                           <label
@@ -198,7 +198,7 @@
                             type="checkbox"
                             class="btn-check"
                             :id="`${selectedAdmin.id}3`"
-                            autocomplete="off"
+                            autocomplete="new-password"
                             v-model="selectedAdmin.canInProgress"
                           />
                           <label
@@ -212,7 +212,7 @@
                             type="checkbox"
                             class="btn-check"
                             :id="`${selectedAdmin.id}4`"
-                            autocomplete="off"
+                            autocomplete="new-password"
                             v-model="selectedAdmin.canClose"
                           />
                           <label
@@ -226,7 +226,7 @@
                             type="checkbox"
                             class="btn-check"
                             :id="`${selectedAdmin.id}5`"
-                            autocomplete="off"
+                            autocomplete="new-password"
                             v-model="selectedAdmin.manageAdmins"
                           />
                           <label
@@ -315,19 +315,14 @@ export default {
     getStatus(index) {
       if (index == 0) {
         this.canAccept = !this.canAccept;
-        console.log(this.canAccept);
       } else if (index == 1) {
         this.canReject = !this.canReject;
-        console.log(this.canReject);
       } else if (index == 2) {
         this.canClose = !this.canClose;
-        console.log(this.canClose);
       } else if (index == 3) {
         this.canInProgress = !this.canInProgress;
-        console.log(this.canInProgress);
       } else if (index == 4) {
         this.manageAdmins = !this.manageAdmins;
-        console.log(this.manageAdmins);
       }
     },
 

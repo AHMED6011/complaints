@@ -144,7 +144,6 @@ export default {
   },
 
   mounted() {
-    console.log(this.complaints);
     this.fetchData();
   },
 };

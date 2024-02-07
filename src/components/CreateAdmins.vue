@@ -37,7 +37,7 @@
               <div class="mb-3 row">
                 <input
                   type="text"
-                  autocomplete="off"
+                  autocomplete="new-password"
                   v-model="name"
                   placeholder="Kullanıcı adı"
                   class="form-control"
@@ -46,7 +46,7 @@
               <div class="mb-3 row">
                 <input
                   type="email"
-                  autocomplete="off"
+                  autocomplete="new-password"
                   v-model="email"
                   placeholder="e-posta"
                   class="form-control"
@@ -55,7 +55,7 @@
               <div class="mb-3 row">
                 <input
                   type="text"
-                  autocomplete="off"
+                  autocomplete="new-password"
                   v-model="phoneNumber"
                   placeholder="Telefon numarası"
                   class="form-control"
@@ -85,16 +85,14 @@
                 </select>
               </div>
               <div class="mb-3 row">
-                <form class="p-0" autocomplete="off">
-                  <input
-                    type="password"
-                    autocomplete="new-passwor"
-                    v-model="password"
-                    placeholder="Şifre"
-                    class="form-control"
-                    required
-                  />
-                </form>
+                <input
+                  type="password"
+                  autocomplete="new-passwor"
+                  v-model="password"
+                  placeholder="Şifre"
+                  class="form-control"
+                  required
+                />
               </div>
 
               <div class="mb-3 row justify-content-center">
@@ -109,7 +107,7 @@
                     type="checkbox"
                     class="btn-check"
                     :id="`${index}`"
-                    autocomplete="off"
+                    autocomplete="new-password"
                     @click="getStatus(index)"
                   />
                   <label class="btn btn-outline-primary" :for="`${index}`">{{
@@ -245,6 +243,7 @@ export default {
           canClose: this.canClose,
           canInProgress: this.canInProgress,
           email: this.email,
+          manageAdmins: this.manageAdmins,
         };
 
         const response = await axios.post(
@@ -260,11 +259,10 @@ export default {
 
         location.reload();
       } catch (error) {
-        console.log(error);
         Swal.fire({
           icon: "error",
           title: "Oops...",
-          text: `${error}`,
+          text: `${error.response.data}`,
         });
       }
     },

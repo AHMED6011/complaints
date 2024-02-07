@@ -25,6 +25,7 @@
                 class="inputField"
                 type="text"
                 required
+                autocomplete="new-password"
               />
             </div>
           </div>
@@ -45,6 +46,7 @@
               <input
                 placeholder="e-posta"
                 v-model="email"
+                autocomplete="new-password"
                 class="inputField"
                 type="email"
                 required
@@ -68,6 +70,7 @@
               <input
                 placeholder="Kimlik numarası"
                 v-model="tc"
+                autocomplete="new-password"
                 class="inputField"
                 type="text"
                 required
@@ -89,17 +92,15 @@
                 ></path>
               </svg>
 
-              <form class="p-0" autocomplete="off">
-                <input
-                  placeholder="Şifre"
-                  v-model="password"
-                  autocomplete="new-passwor"
-                  id="password"
-                  class="inputField"
-                  type="password"
-                  required
-                />
-              </form>
+              <input
+                placeholder="Şifre"
+                v-model="password"
+                autocomplete="false"
+                id="password"
+                class="inputField"
+                type="password"
+                required
+              />
             </div>
           </div>
           <div class="col-6">
@@ -118,6 +119,7 @@
               <input
                 placeholder="Telefon numarası"
                 v-model="phoneNumber"
+                autocomplete="new-password"
                 id="phoneNumber"
                 class="inputField"
                 type="text"
@@ -128,7 +130,7 @@
 
           <button id="button" @click.prevent="createUser">Üye ol</button>
           <div class="signupContainer">
-            <p>bir hesabım var</p>
+            <p class="mt-3 mb-2">bir hesabım var</p>
             <RouterLink to="/">Giriş yap</RouterLink>
           </div>
         </div>
@@ -234,7 +236,7 @@ export default {
 
         if (response.status === 200) {
           this.cookies.set("myCookie", response.data.token);
-          this.cookies.set("isStaff", response.data.isStaff);
+          this.cookies.set("isStaff", "false");
           Swal.fire({
             icon: "success",
             title: "Başarılı bir şekilde kaydoldunuz",

@@ -235,7 +235,6 @@ export default {
         }
       );
       location.reload();
-      console.log(result.data);
     },
     async rejected() {
       const result = await axios.post(
@@ -249,7 +248,6 @@ export default {
       );
       location.reload();
 
-      console.log(result.data);
     },
     async inProgress() {
       const result = await axios.post(
@@ -263,7 +261,6 @@ export default {
       );
       location.reload();
 
-      console.log(result.data);
     },
     async closed() {
       const result = await axios.post(
@@ -276,7 +273,6 @@ export default {
         }
       );
       location.reload();
-      console.log(result.data);
     },
     getStatusMessage(status) {
       if (status === 0) {
@@ -329,7 +325,6 @@ export default {
   },
   created() {
     this.isAdmin = this.isStaff;
-    console.log(this.isAdmin);
     this.getComplaint();
     this.isAllow;
   },
