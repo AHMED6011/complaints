@@ -23,109 +23,149 @@
         </div>
       </div>
     </div>
-    <div v-if="complaint">
-      <div class="container">
-        <div class="header-title">
-          <h1 class="text-center py-5 text-primary fw-bold">
-            Şikayet Detayları
-          </h1>
-          <div :class="IsStaff()">
-            <button
-              @click.prevent="accepted()"
-              v-if="complaint.status === 0 && canAccept == 'true'"
-              class="btn m-2 text-light fw-bold bg-success"
-            >
-              Kabul et
-            </button>
-            <button
-              @click.prevent="rejected()"
-              v-if="complaint.status === 0 && canReject == 'true'"
-              class="btn m-2 text-light fw-bold bg-danger"
-            >
-              Reddet
-            </button>
-            <button
-              @click.prevent="inProgress()"
-              v-if="complaint.status === 1 && canInProgress == 'true'"
-              class="btn m-2 text-light fw-bold bg-warning"
-            >
-              Devam ediyor
-            </button>
-            <button
-              @click.prevent="closed()"
-              v-if="complaint.status === 3 && canClose == 'true'"
-              class="btn m-2 text-light fw-bold bg-dark"
-            >
-              Tamamlandı
-            </button>
-            <button
-              @click.prevent="deleteComplaint()"
-              v-if="
-                complaint.status === 0 &&
-                canAccept == 'true' &&
-                canReject == 'true' &&
-                canInProgress == 'true' &&
-                canClose == 'true'
-              "
-              class="btn m-2 text-light fw-bold bg-danger"
-            >
-              Şikayet Sil
-            </button>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-12 col-md-3 col-sm-6 text-center">
-            <h4 class="my-4 fw-bold">Başlık</h4>
-            <p class="text-secondary text-break">{{ complaint.title }}</p>
-          </div>
-          <div class="col-12 col-md-3 col-sm-6 text-center">
-            <h4 class="my-4 fw-bold">Tarih</h4>
-            <p class="text-secondary text-break">
-              {{ formatDate(complaint.createdDate) }}
-            </p>
-          </div>
-          <div class="col-12 col-md-3 col-sm-6 text-center">
-            <h4 class="my-4 fw-bold">Adres</h4>
-            <p class="text-secondary text-break">{{ complaint.address }}</p>
-          </div>
-          <div class="col-12 col-md-3 col-sm-6 text-center">
-            <h4 class="my-4 fw-bold">Kategori</h4>
-            <p class="text-secondary text-break">{{ complaint.category }}</p>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-12 col-md-8 text-center desc">
-            <h4 class="my-4 fw-bold">Açıklama</h4>
-            <p class="text-secondary text-break">{{ complaint.description }}</p>
-          </div>
 
-          <div class="col-12 col-md-4 text-center">
-            <h4 class="my-4 fw-bold">Durum</h4>
-            <p class="text-secondary text-break">
-              {{ getStatusMessage(complaint.status) }}
-            </p>
-          </div>
+    <div class="container">
+      <div class="header-title row pt-5 pb-3">
+        <h3 class="text-center col-6 text-primary fw-bold">
+          Şikayet Detayları
+        </h3>
+
+        <div
+          class="actions col-4 offset-2 justify-content-end"
+          :class="IsStaff()"
+        >
+          <button
+            @click.prevent="accepted()"
+            v-if="complaint.status === 0 && canAccept == 'true'"
+            class="btn m-2 text-light fw-bold bg-success"
+          >
+            Kabul et
+          </button>
+          <button
+            @click.prevent="rejected()"
+            v-if="complaint.status === 0 && canReject == 'true'"
+            class="btn m-2 text-light fw-bold bg-danger"
+          >
+            Reddet
+          </button>
+          <button
+            @click.prevent="inProgress()"
+            v-if="complaint.status === 1 && canInProgress == 'true'"
+            class="btn m-2 text-light fw-bold bg-warning"
+          >
+            Devam ediyor
+          </button>
+          <button
+            @click.prevent="closed()"
+            v-if="complaint.status === 3 && canClose == 'true'"
+            class="btn m-2 text-light fw-bold bg-dark"
+          >
+            Tamamlandı
+          </button>
+          <button
+            @click.prevent="deleteComplaint()"
+            v-if="
+              complaint.status === 0 &&
+              canAccept == 'true' &&
+              canReject == 'true' &&
+              canInProgress == 'true' &&
+              canClose == 'true'
+            "
+            class="btn m-2 text-light fw-bold bg-danger"
+          >
+            Şikayet Sil
+          </button>
         </div>
-        <div class="row border-0 mt-4 justify-content-center">
-          <div class="col-6 text-center">
-            <h3 class="my-4 fw-bold">Geçimiş</h3>
-            <ul class="list-group" v-for="log in complaint.logs" :key="log.id">
-              <li
-                class="list-group-item text-secondary text-break d-flex justify-content-around border-0 text-start"
-              >
-                <span> {{ log.logText }} </span>
-                <span> {{ formatDate(log.logDate) }} </span>
-              </li>
-            </ul>
-          </div>
-          <div class="col-12 col-md-6" v-if="complaint.image">
-            <h2 class="my-4 fw-bold text-center">Resim</h2>
-            <img
-              class="img-fluid"
-              :src="`${this.API}/api/Files/${complaint.image}`"
-              alt=""
-            />
-          </div>
+      </div>
+      <div class="row details justify-content-between">
+        <div class="col-6">
+          <ul class="list-group list-group-horizontal">
+            <li class="list-group-item border-0">
+              <h6 class="fw-bold p-1">Başlık</h6>
+              <p class="text-secondary text-break">
+                {{ complaint.title }}
+              </p>
+            </li>
+            <li class="list-group-item border-0">
+              <h6 class="fw-bold p-1">Durum</h6>
+              <p :style="{ color: getStatusColor(complaint.status) }">
+                {{ getStatusMessage(complaint.status) }}
+              </p>
+            </li>
+            <li class="list-group-item border-0">
+              <h6 class="fw-bold p-1">Kategori</h6>
+              <p class="text-secondary text-break">
+                {{ complaint.category }}
+              </p>
+            </li>
+
+            <li class="list-group-item border-0">
+              <h6 class="fw-bold p-1">Tarih</h6>
+              <p class="text-secondary text-break">
+                {{ formatDate(complaint.createdDate) }}
+              </p>
+            </li>
+
+            <li class="list-group-item border-0">
+              <h6 class="fw-bold p-1">Adres</h6>
+              <p class="text-secondary text-break">{{ complaint.address }}</p>
+            </li>
+
+            <li class="list-group-item border-0" v-if="isStaff === 'true'">
+              <h6 class="fw-bold p-1">Kullanıcı adı</h6>
+              <p class="text-secondary text-break">{{ complaint.user.name }}</p>
+            </li>
+            <li class="list-group-item border-0" v-if="isStaff === 'true'">
+              <h6 class="fw-bold p-1">E-posta</h6>
+              <p class="text-secondary text-break">
+                {{ complaint.user.email }}
+              </p>
+            </li>
+
+            <li class="list-group-item border-0" v-if="isStaff === 'true'">
+              <h6 class="fw-bold p-1">Telefon numarası</h6>
+              <p class="text-secondary text-break">
+                {{ complaint.user.phoneNumber }}
+              </p>
+            </li>
+            <li class="list-group-item border-0" v-if="isStaff === 'true'">
+              <h6 class="fw-bold p-1">Kimlik numarası</h6>
+              <p class="text-secondary text-break">
+                {{ complaint.user.tc }}
+              </p>
+            </li>
+          </ul>
+        </div>
+
+        <div class="col-5 img-parent offset-1" v-if="complaint.image">
+          <img
+            class="img-fluid"
+            :src="`${this.API}/api/Files/${complaint.image}`"
+            alt=""
+          />
+        </div>
+
+        <hr class="mt-2" />
+
+        <div class="col-6 text-center bg-color">
+          <h6 class="fw-bold">Açıklama</h6>
+          <p class="text-secondary text-break">
+            {{ complaint.description }}
+          </p>
+        </div>
+
+        <div class="col-6 user-details bg-color pb-5">
+          <h5 class="text-center fw-bold">Geçimiş</h5>
+          <ul class="rounded list-group">
+            <li
+              v-for="log in complaint.logs"
+              :key="log.id"
+              class="list-group-item text-secondary text-break d-flex justify-content-around border-0 text-start"
+            >
+              <span class="p-1"> {{ log.logText }} </span>
+              <span class="p-1"> {{ formatDate(log.logDate) }} </span>
+            </li>
+          </ul>
         </div>
       </div>
       <button
@@ -135,7 +175,7 @@
         aria-controls="offcanvasExample"
         @click="openChatBox"
       >
-        <i class="fa-regular fa-comment-dots"></i>
+        <i class="fa-regular fa-comment-dots fa-2xl"></i>
       </button>
       <div
         class="offcanvas offcanvas-start"
@@ -200,7 +240,7 @@ export default {
           }
         );
         this.complaint = response.data;
-      } catch (err) {
+      } catch (error) {
         Swal.fire({
           icon: "error",
           title: "Oops...",
@@ -215,7 +255,7 @@ export default {
             Authorization: `Bearer ${this.isAllow}`,
           },
         });
-        location.replace("/complaints");
+        this.$router.push("/complaints");
       } catch (error) {
         Swal.fire({
           icon: "error",
@@ -247,7 +287,6 @@ export default {
         }
       );
       location.reload();
-
     },
     async inProgress() {
       const result = await axios.post(
@@ -260,7 +299,6 @@ export default {
         }
       );
       location.reload();
-
     },
     async closed() {
       const result = await axios.post(
@@ -333,7 +371,6 @@ export default {
 
 <style lang="scss" scoped>
 .row {
-  border-bottom: 2px solid #bbbbbb;
   font-weight: bold;
 }
 
@@ -346,7 +383,7 @@ export default {
   bottom: 50px;
   right: 50px;
   background-color: #0d6efd;
-  padding: 10px 15px;
+  padding: 18px 15px;
   border-radius: 50%;
   color: white;
 
@@ -358,6 +395,9 @@ export default {
     box-shadow: 0px 0px 10px 6px #9f9f9f;
     transform: scale(1.1);
   }
+}
+p {
+  margin: 0;
 }
 
 .status {
@@ -372,10 +412,53 @@ export default {
   height: auto !important;
 }
 
-.header-title {
+.details {
+  ul {
+    display: block;
+    margin-right: 35px;
+    li {
+      width: 100%;
+      display: flex;
+      padding: 0 !important;
+      border-radius: 10px !important;
+
+      &:nth-child(odd) {
+        background-color: #0091ff1a;
+      }
+      h6 {
+        display: block;
+        width: 50%;
+        text-align: right;
+        margin-right: 35px;
+      }
+
+      p {
+        display: block;
+        width: 50%;
+      }
+    }
+  }
+}
+
+.img-parent {
+  padding: 10px;
+  border-radius: 10px;
   display: flex;
-  justify-content: space-evenly;
-  align-items: center;
+
+  & img {
+    max-width: 100%;
+    min-width: 350px;
+    max-height: 400px;
+    min-height: 300px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 30px 5px #7d7d7d;
+  }
+}
+
+.bg-color {
+  background-color: #f0fcff;
+  border-radius: 10px;
+  padding: 30px;
 }
 
 $offset: 187;

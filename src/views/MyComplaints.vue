@@ -41,7 +41,23 @@
       {{ msgError }}
     </h1>
 
-    <table class="responstable" v-if="complaints.length > 0">
+    <label class="select">
+      <select @change="filterBy()" v-model="selectedValue">
+        <option value="" selected>Tüm</option>
+        <option value="0">onay bekleniyor</option>
+        <option value="1">Kabul edilmiş</option>
+        <option value="2">Reddedilmiş</option>
+        <option value="3">Devam etmekte</option>
+        <option value="4">Tamamlandı</option>
+      </select>
+    </label>
+
+    <table
+      data-aos-duration="1500"
+      data-aos="fade-up"
+      class="responstable"
+      v-if="complaints.length > 0"
+    >
       <tr>
         <th>Başlık</th>
         <th>Kategori</th>
@@ -50,11 +66,16 @@
         <th>Daha fazla detay</th>
       </tr>
 
-      <tr v-for="complaint in complaints" :key="complaint.id">
-        <td>{{ complaint.title }}</td>
-        <td>{{ complaint.category }}</td>
-        <td>{{ formatDate(complaint.createdDate) }}</td>
-        <td>
+      <tr
+        data-aos-duration="1000"
+        data-aos="fade-up"
+        v-for="complaint in complaints"
+        :key="complaint.id"
+      >
+        <td class="text-break">{{ complaint.title }}</td>
+        <td class="text-break">{{ complaint.category }}</td>
+        <td class="text-break">{{ formatDate(complaint.createdDate) }}</td>
+        <td class="text-break">
           <span
             class="state"
             :style="{ color: getStatusColor(complaint.status) }"
@@ -62,7 +83,7 @@
             {{ getStatusMessage(complaint.status) }}
           </span>
         </td>
-        <td>
+        <td class="text-break">
           <RouterLink
             :to="{ name: 'ComplaintDetails', params: { id: complaint.id } }"
             class="btn btn-info text-dark"
@@ -71,6 +92,56 @@
         </td>
       </tr>
     </table>
+    <div class="w-100 text-center">
+      <nav class="d-flex justify-content-center">
+        <ul class="pagination">
+          <!-- <li
+            :class="{ disabled: paging == 0, 'page-item': paging > 0 }"
+            class="page-item"
+          >
+            <button
+              @click.prevent="
+                desincreasePage();
+                skipComplaints();
+              "
+              class="page-link"
+            >
+              Previous
+            </button>
+          </li> -->
+          <li
+            class="page-item"
+            aria-current="page"
+            v-for="(item, index) in arrayNumbers"
+            :key="index"
+          >
+            <button
+              :class="{ 'page-link active': x }"
+              @click.prevent="skipComplaints(index)"
+              class="page-link"
+            >
+              {{ index + 1 }}
+            </button>
+          </li>
+
+          <!-- <li
+            :class="{ disabled: !noMoreData, 'page-item': noMoreData == true }"
+            class="page-item"
+          >
+            <button
+              @click.prevent="
+                increasePage();
+                skipComplaints();
+                checkForMoreData();
+              "
+              class="page-link"
+            >
+              Next
+            </button>
+          </li> -->
+        </ul>
+      </nav>
+    </div>
   </main>
 </template>
 
@@ -86,6 +157,13 @@ export default {
       isLoading: false,
       isErr: false,
       msgError: "",
+      selectedValue: "",
+      paging: 0,
+      noMoreData: true,
+      pageNumbers: 0,
+      currentPage: 0,
+      arrayNumbers: [],
+      x: false,
     };
   },
   methods: {
@@ -122,29 +200,80 @@ export default {
       const day = date.getDate().toString().padStart(2, "0");
       return `${year}-${month}-${day}`;
     },
-    async fetchData() {
-      try {
-        this.isLoading = true;
-        const response = await axios.get(`${this.API}/api/Complaints`, {
-          headers: {
-            Authorization: `Bearer ${this.isAllow}`,
-            "Content-Type": "application/json",
-          },
-        });
-        this.isLoading = false;
+    increasePage() {
+      this.paging++;
+    },
+    desincreasePage() {
+      this.paging--;
+      this.noMoreData = true;
+    },
 
-        this.complaints = response.data;
+    async skipComplaints(index) {
+      try {
+        const response = await axios.get(
+          `${this.API}/api/Complaints/Paging?skip=${index || 0}&take=5`,
+          {
+            headers: {
+              Authorization: `Bearer ${this.isAllow}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        console.log(index);
+        // console.log(this.currentPage);
+
+        // if (index == this.currentPage) {
+        //   this.x = true;
+        // } else {
+        //   this.x = false;
+        // }
+        this.isLoading = false;
+        this.complaints = response.data.items;
+        this.pageNumbers = response.data.total / 5;
+        const arrayLength = Math.ceil(this.pageNumbers);
+        const number = "item";
+        this.arrayNumbers = [...Array(arrayLength)].fill(number);
+        window.scrollTo(0, 150);
       } catch (error) {
         this.isLoading = false;
         this.isErr = true;
-
         this.msgError = "İşlem sırasında bir hata oluştu";
+      }
+    },
+
+    async filterBy() {
+      try {
+        if (this.selectedValue === 0) {
+          this.selectedValue = 0;
+        } else if (this.selectedValue === 1) {
+          this.selectedValue = 1;
+        } else if (this.selectedValue === 2) {
+          this.selectedValue = 2;
+        } else if (this.selectedValue === 3) {
+          this.selectedValue = 3;
+        } else if (this.selectedValue === "") {
+          this.selectedValue = "";
+        }
+        const response = await axios.get(
+          `${this.API}/api/Complaints/Paging?skip=0&status=${this.selectedValue}&take=5`,
+          {
+            headers: {
+              Authorization: `Bearer ${this.isAllow}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        this.complaints = response.data.items;
+
+        console.log(this.complaints);
+      } catch (error) {
+        console.log(error);
       }
     },
   },
 
   mounted() {
-    this.fetchData();
+    this.skipComplaints();
   },
 };
 </script>
@@ -176,6 +305,7 @@ $table-header-border: 1px solid #fff;
 ) {
   .responstable {
     margin: 1em 0;
+    margin-bottom: 80px;
     width: 100%;
     overflow: hidden;
     background: $background-color;
@@ -313,5 +443,59 @@ $duration: 1.4s;
     stroke-dashoffset: $offset;
     transform: rotate(450deg);
   }
+}
+
+select {
+  appearance: none;
+  background-color: #4285f4;
+  border: 0;
+  outline: 0;
+  color: inherit;
+  box-shadow: none;
+}
+select::-ms-expand {
+  display: none;
+}
+.select {
+  position: relative;
+  display: flex;
+  width: 200px;
+  background-color: #fff;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  select {
+    flex: 1;
+    padding: 1em;
+    cursor: pointer;
+    font-weight: bold;
+
+    option {
+      background-color: #fff;
+    }
+  }
+  &::after {
+    content: "\25BC";
+    position: absolute;
+    right: 15px;
+    top: 16px;
+    transition: 0.25s all ease;
+    pointer-events: none;
+  }
+  &:hover::after {
+    color: #fff;
+    animation: bounce 0.5s infinite;
+  }
+}
+@keyframes bounce {
+  25% {
+    transform: translatey(5px);
+  }
+  75% {
+    transform: translatey(-5px);
+  }
+}
+
+.page-link {
+  box-shadow: none;
 }
 </style>

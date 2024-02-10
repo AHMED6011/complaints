@@ -33,11 +33,11 @@
             ></button>
           </div>
           <div class="modal-body">
-            <form>
+            <form autocomplete="off">
               <div class="mb-3 row">
                 <input
                   type="text"
-                  autocomplete="new-password"
+                  autocomplete="off"
                   v-model="name"
                   placeholder="Kullanıcı adı"
                   class="form-control"
@@ -46,7 +46,7 @@
               <div class="mb-3 row">
                 <input
                   type="email"
-                  autocomplete="new-password"
+                  autocomplete="off"
                   v-model="email"
                   placeholder="e-posta"
                   class="form-control"
@@ -54,9 +54,12 @@
               </div>
               <div class="mb-3 row">
                 <input
-                  type="text"
-                  autocomplete="new-password"
+                  type="email"
+                  autocomplete="off"
                   v-model="phoneNumber"
+                  ref="User"
+                  readonly
+                  @focus="removeReadonlyUser()"
                   placeholder="Telefon numarası"
                   class="form-control"
                 />
@@ -87,8 +90,12 @@
               <div class="mb-3 row">
                 <input
                   type="password"
-                  autocomplete="new-passwor"
+                  autocomplete="off"
+                  ref="Pass"
+                  @focus="removeReadonlyPass()"
+                  readonly
                   v-model="password"
+                  value="jhksdf"
                   placeholder="Şifre"
                   class="form-control"
                   required
@@ -107,7 +114,7 @@
                     type="checkbox"
                     class="btn-check"
                     :id="`${index}`"
-                    autocomplete="new-password"
+                    v-model="state.state"
                     @click="getStatus(index)"
                   />
                   <label class="btn btn-outline-primary" :for="`${index}`">{{
@@ -158,6 +165,7 @@ export default {
       email: "",
       password: "",
       phoneNumber: "",
+      ischecked: true,
       status: [
         { state: false, text: "Reddedildi" },
         { state: false, text: "Kabul edildi" },
@@ -246,16 +254,12 @@ export default {
           manageAdmins: this.manageAdmins,
         };
 
-        const response = await axios.post(
-          `${this.API}/api/Users`,
-          createAdmin,
-          {
-            headers: {
-              Authorization: `Bearer ${this.isAllow}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        await axios.post(`${this.API}/api/Users`, createAdmin, {
+          headers: {
+            Authorization: `Bearer ${this.isAllow}`,
+            "Content-Type": "application/json",
+          },
+        });
 
         location.reload();
       } catch (error) {
@@ -267,11 +271,36 @@ export default {
       }
     },
     cancelButton() {
-      location.reload();
+      this.phoneNumber = "";
+      this.password = "";
+      this.category = "";
+      this.email = "";
+      this.manageAdmins = false;
+      this.status = [
+        { state: false, text: "Reddedildi" },
+        { state: false, text: "Kabul edildi" },
+        { state: false, text: "Devam ediyor" },
+        { state: false, text: "Tamamlandı" },
+        { state: false, text: "Yönetici" },
+      ];
+    },
+    removeReadonlyUser() {
+      const inputElement = this.$refs.User;
+      if (inputElement) {
+        inputElement.removeAttribute("readonly");
+      }
+      console.log(inputElement);
+    },
+    removeReadonlyPass() {
+      const inputElement = this.$refs.Pass;
+      if (inputElement) {
+        inputElement.removeAttribute("readonly");
+      }
+      setTimeout(() => {
+        inputElement.value = "";
+      }, 50);
     },
   },
-
-  created() {},
 };
 </script>
 

@@ -1,7 +1,7 @@
 <template>
   <main class="main-bg">
     <div class="d-flex justify-content-center align-items-center my-5">
-      <form class="form_main">
+      <form class="form_main" autocomplete="off">
         <p class="heading">Üye ol</p>
         <div class="row">
           <div class="col-6">
@@ -25,7 +25,7 @@
                 class="inputField"
                 type="text"
                 required
-                autocomplete="new-password"
+                autocomplete="off"
               />
             </div>
           </div>
@@ -46,7 +46,7 @@
               <input
                 placeholder="e-posta"
                 v-model="email"
-                autocomplete="new-password"
+                autocomplete="off"
                 class="inputField"
                 type="email"
                 required
@@ -70,7 +70,7 @@
               <input
                 placeholder="Kimlik numarası"
                 v-model="tc"
-                autocomplete="new-password"
+                autocomplete="off"
                 class="inputField"
                 type="text"
                 required
@@ -95,11 +95,14 @@
               <input
                 placeholder="Şifre"
                 v-model="password"
-                autocomplete="false"
                 id="password"
                 class="inputField"
                 type="password"
+                autocomplete="off"
                 required
+                ref="Pass"
+                @focus="removeReadonlyPass()"
+                readonly
               />
             </div>
           </div>
@@ -119,7 +122,7 @@
               <input
                 placeholder="Telefon numarası"
                 v-model="phoneNumber"
-                autocomplete="new-password"
+                autocomplete="off"
                 id="phoneNumber"
                 class="inputField"
                 type="text"
@@ -154,6 +157,7 @@ export default {
       email: "",
       isStaff: "",
       cookies: useCookies().cookies,
+      inputType: "text",
     };
   },
   methods: {
@@ -261,44 +265,54 @@ export default {
         });
       }
     },
+
+    removeReadonlyPass() {
+      const inputElement = this.$refs.Pass;
+      if (inputElement) {
+        inputElement.removeAttribute("readonly");
+      }
+      setTimeout(() => {
+        inputElement.value = "";
+      }, 50);
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
 .main-bg {
-  background-image: url(../assets/images/register.jpg);
+  background-image: url(../assets/images/2.png);
   background-size: cover;
-  height: 100vh;
+  height: calc(100vh - 70px);
+  background-position: center;
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
   align-items: center;
 }
 .form_main {
+  margin-top: 145px;
   width: 500px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: rgb(255, 255, 255);
-  padding: 30px 30px 30px 30px;
+  background-color: #ffffff;
+  padding: 30px 20px 10px;
   border-radius: 30px;
-  border: 2px solid #d1d1d1;
   transition: 0.5s;
+
+  .heading {
+    font-size: 25px;
+    color: #2e2e2e;
+    font-weight: 700;
+    margin: 5px 0 5px 0;
+  }
 
   &:hover {
     box-shadow: 0px 0px 30px 30px #0505055b;
-    border: 2px solid transparent;
-    transform: scale(1.05);
+    transform: scale(1.01);
   }
-}
-
-.heading {
-  font-size: 25px;
-  color: #2e2e2e;
-  font-weight: 700;
-  margin: 15px 0 30px 0;
 }
 
 .inputContainer {

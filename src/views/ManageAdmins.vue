@@ -364,14 +364,14 @@ export default {
               });
 
               if (useCookies().cookies.get("userID") === id) {
-                this.cookies.set("myCookie", "");
-                this.cookies.set("isStaff", "");
-                this.cookies.set("manageAdmins", "");
-                this.cookies.set("canAccept", "");
-                this.cookies.set("canReject", "");
-                this.cookies.set("canClose", "");
-                this.cookies.set("canInProgress", "");
-                this.cookies.set("userID", "");
+                useCookies().cookies.set("myCookie", "");
+                useCookies().cookies.set("isStaff", "");
+                useCookies().cookies.set("manageAdmins", "");
+                useCookies().cookies.set("canAccept", "");
+                useCookies().cookies.set("canReject", "");
+                useCookies().cookies.set("canClose", "");
+                useCookies().cookies.set("canInProgress", "");
+                useCookies().cookies.set("userID", "");
                 location.replace("/");
               }
             }

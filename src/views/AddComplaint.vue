@@ -22,7 +22,6 @@
                   placeholder=" Adres"
                   class="form-control adres-input"
                   id="validationCustom1"
-                  autocomplete="new-password"
                   v-model="address"
                   required
                 ></textarea>
@@ -32,7 +31,7 @@
                   placeholder="Başlık"
                   class="form-control my-3"
                   id="validationCustom2"
-                  autocomplete="new-password"
+                  autocomplete="off"
                   v-model="title"
                   required
                 />
@@ -140,65 +139,69 @@ export default {
       this.imageName = event.target.files[0].name;
     },
     async addComplaint() {
-      if (
-        !this.category ||
-        !this.desc ||
-        !this.title ||
-        !this.address ||
-        !this.imageFile
-      ) {
-        sweetAlert("Oops...", "Sanırım girişi doldurmayı unuttunuz", "error");
-      }
-
-      const formData = new FormData();
-      formData.append("files", this.imageFile, this.imageFile.name);
-
-      const responseImg = await axios.post(`${this.API}/api/Files`, formData, {
-        headers: {
-          Authorization: `Bearer ${this.isAllow}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      const sendData = {
-        userId: "",
-        category: this.category,
-        description: this.desc,
-        address: this.address,
-        title: this.title,
-        image: responseImg.data,
-      };
-
       try {
-        await axios.post(`${this.API}/api/Complaints`, sendData, {
-          headers: {
-            Authorization: `Bearer ${this.isAllow}`,
-            "Content-Type": "application/json",
-          },
-        });
+        if (
+          !this.category ||
+          !this.desc ||
+          !this.title ||
+          !this.address ||
+          !this.imageFile
+        ) {
+          sweetAlert("Oops...", "Sanırım girişi doldurmayı unuttunuz", "error");
+        } else {
+          const formData = new FormData();
+          formData.append("files", this.imageFile, this.imageFile.name);
 
-        swal(
-          {
-            title: "",
-            text: "Şehrimizi daha iyi bir yer haline getirmemize katkı sağladığınız için teşekkür ederiz. En kısa sürede size yanıt vereceğiz",
-            type: "success",
-            confirmButtonColor: "#a5dc86",
-            confirmButtonText: "TAMAM",
-            closeOnConfirm: false,
-          },
-          function (isConfirm) {
-            if (isConfirm) {
-              location.replace("/complaints");
+          const responseImg = await axios.post(
+            `${this.API}/api/Files`,
+            formData,
+            {
+              headers: {
+                Authorization: `Bearer ${this.isAllow}`,
+                "Content-Type": "multipart/form-data",
+              },
             }
-          }
-        );
+          );
 
-        this.category = "";
-        this.desc = "";
-        this.address = "";
-        this.title = "";
-        this.imageFile = "";
-        this.imageName = "";
+          const sendData = {
+            userId: "",
+            category: this.category,
+            description: this.desc,
+            address: this.address,
+            title: this.title,
+            image: responseImg.data,
+          };
+
+          await axios.post(`${this.API}/api/Complaints`, sendData, {
+            headers: {
+              Authorization: `Bearer ${this.isAllow}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          swal(
+            {
+              title: "",
+              text: "Şehrimizi daha iyi bir yer haline getirmemize katkı sağladığınız için teşekkür ederiz. En kısa sürede size yanıt vereceğiz",
+              type: "success",
+              confirmButtonColor: "#a5dc86",
+              confirmButtonText: "TAMAM",
+              closeOnConfirm: false,
+            },
+            function (isConfirm) {
+              if (isConfirm) {
+                location.replace("/complaints");
+              }
+            }
+          );
+
+          this.category = "";
+          this.desc = "";
+          this.address = "";
+          this.title = "";
+          this.imageFile = "";
+          this.imageName = "";
+        }
       } catch (error) {
         Swal.fire({
           icon: "error",

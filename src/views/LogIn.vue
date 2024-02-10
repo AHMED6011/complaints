@@ -1,7 +1,7 @@
 <template>
   <main class="main-bg">
-    <div class="d-flex justify-content-center align-items-center my-5">
-      <form class="form_main">
+    <div class="d-flex justify-content-center align-items-center mt-5 mb-3">
+      <form class="form_main" autocomplete="nope">
         <p class="heading">Giriş yap</p>
         <div class="inputContainer">
           <svg
@@ -17,13 +17,16 @@
             ></path>
           </svg>
           <input
-            placeholder="e-posta"
+            placeholder="Kullanıcı adı"
+            type="text"
             id="username"
             v-model="username"
-            autocomplete="new-password"
             class="inputField"
-            type="text"
             required
+            @focus="removeReadonlyUser()"
+            ref="User"
+            autocomplete="off"
+            readonly
           />
         </div>
 
@@ -41,12 +44,15 @@
             ></path>
           </svg>
           <input
-            placeholder="Şifre"
             v-model="password"
-            autocomplete="new-password"
-            id="password"
-            class="inputField"
+            placeholder="Şifre"
             type="password"
+            readonly="readonly"
+            id="password"
+            ref="Pass"
+            autocomplete="off"
+            @focus="removeReadonlyPass()"
+            class="inputField"
             required
           />
         </div>
@@ -113,44 +119,59 @@ export default {
         });
       }
     },
+    removeReadonlyUser() {
+      const inputElement = this.$refs.User;
+      if (inputElement) {
+        inputElement.removeAttribute("readonly");
+      }
+      console.log(inputElement);
+    },
+    removeReadonlyPass() {
+      const inputElement = this.$refs.Pass;
+      if (inputElement) {
+        inputElement.removeAttribute("readonly");
+      }
+      setTimeout(() => {
+        inputElement.value = "";
+      }, 50);
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
 .main-bg {
-  background-image: url(../assets/images/register.jpg);
+  background-image: url(../assets/images/2.png);
   background-size: cover;
   height: calc(100vh - 70px);
+  background-position: center;
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
   align-items: center;
 }
 .form_main {
+  margin-top: 125px;
   width: 370px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: rgb(255, 255, 255);
-  padding: 30px 30px 30px 30px;
+  background-color: #ffffff;
+  padding: 30px 20px;
   border-radius: 30px;
-  border: 2px solid #d1d1d1;
   transition: 0.5s;
+
+  .heading {
+    font-size: 25px;
+    color: #2e2e2e;
+    font-weight: 700;
+  }
 
   &:hover {
     box-shadow: 0px 0px 30px 30px #0505055b;
-    border: 2px solid transparent;
-    transform: scale(1.05);
+    transform: scale(1.03);
   }
-}
-
-.heading {
-  font-size: 25px;
-  color: #2e2e2e;
-  font-weight: 700;
-  margin: 15px 0 30px 0;
 }
 
 .inputContainer {
@@ -186,9 +207,7 @@ export default {
 }
 
 .inputField::placeholder {
-  color: rgb(80, 80, 80);
-  font-size: 1em;
-  font-weight: 500;
+  color: #505050;
 }
 
 #button {

@@ -27,4 +27,8 @@ app.use(router);
 
 app.mount("#app");
 
+AOS.init({
+  startEvent: "DOMContentLoaded",
+  once: true,
+});
 export { isAllowed };
