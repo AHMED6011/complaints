@@ -289,7 +289,6 @@ export default {
       if (inputElement) {
         inputElement.removeAttribute("readonly");
       }
-      console.log(inputElement);
     },
     removeReadonlyPass() {
       const inputElement = this.$refs.Pass;

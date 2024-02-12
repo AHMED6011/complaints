@@ -1,146 +1,122 @@
 <template>
   <main>
-    <h1
-      class="text-center py-5 text-primary fw-bold"
-      v-if="complaints.length == 0 && isErr == false"
-    >
-      Henüz Şikayet Yok
-    </h1>
-    <h1
-      class="text-center py-3 text-primary fw-bold"
-      v-if="complaints.length > 0"
-    >
-      Şikayetlerim
-    </h1>
-
-    <div class="container spinner-container" v-if="isLoading">
-      <div class="row justify-content-center align-items-centers">
-        <div class="col-12 text-center">
-          <svg
-            class="spinner"
-            width="65px"
-            height="65px"
-            viewBox="0 0 66 66"
-            xmlns="http://www.w3.org/2000/svg"
+    <div class="container-fluid">
+      <div class="row d-flex justify-content-evenly py-3">
+        <div class="col-3 d-flex justify-content-start p-0">
+          <label class="select">
+            <select @change="filterBy()" v-model="selectedValue">
+              <option value="" selected>Tüm</option>
+              <option value="0">onay bekleniyor</option>
+              <option value="1">Kabul edilmiş</option>
+              <option value="2">Reddedilmiş</option>
+              <option value="3">Devam etmekte</option>
+              <option value="4">Tamamlandı</option>
+            </select>
+          </label>
+        </div>
+        <div class="col-7 offset-2 d-flex justify-content-start p-0">
+          <h1
+            class="text-center text-primary fw-bold"
+            v-if="complaints.length > 0"
           >
-            <circle
-              class="path"
-              fill="none"
-              stroke-width="6"
-              stroke-linecap="round"
-              cx="33"
-              cy="33"
-              r="30"
-            ></circle>
-          </svg>
+            <span v-if="isStaff == 'true'" style="margin-left: -100px"
+              >Admin</span
+            >
+            Tüm Şikayetler
+          </h1>
         </div>
       </div>
+
+      <h1
+        class="text-center py-5 text-primary fw-bold"
+        v-if="complaints.length == 0 && isErr == false"
+      >
+        Henüz Şikayet Yok
+      </h1>
+
+      <div class="container spinner-container" v-if="isLoading">
+        <div class="row justify-content-center align-items-centers">
+          <div class="col-12 text-center">
+            <svg
+              class="spinner"
+              width="65px"
+              height="65px"
+              viewBox="0 0 66 66"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                class="path"
+                fill="none"
+                stroke-width="6"
+                stroke-linecap="round"
+                cx="33"
+                cy="33"
+                r="30"
+              ></circle>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <h1 class="text-center py-5 text-danger fw-bold" v-if="isErr">
+        {{ msgError }}
+      </h1>
+    </div>
+    <div class="scroll">
+      <table
+        data-aos-duration="1500"
+        data-aos="fade-up"
+        class="responstable"
+        v-if="complaints.length > 0"
+      >
+        <tr>
+          <th>Başlık</th>
+          <th>Kategori</th>
+          <th>Tarih</th>
+          <th>Durum</th>
+          <th>Daha fazla detay</th>
+        </tr>
+
+        <tr v-for="(complaint, index) in displayedComplaints" :key="index">
+          <td class="text-break">
+            {{ complaint.title }}
+          </td>
+          <td class="text-break">
+            {{ complaint.category }}
+          </td>
+          <td class="text-break">
+            {{ formatDate(complaint.createdDate) }}
+          </td>
+          <td class="text-break">
+            <span
+              class="state"
+              :style="{ color: getStatusColor(complaint.status) }"
+            >
+              {{ getStatusMessage(complaint.status) }}
+            </span>
+          </td>
+          <td class="text-break">
+            <RouterLink
+              :to="{ name: 'ComplaintDetails', params: { id: complaint.id } }"
+              class="btn btn-info text-dark"
+              >Daha fazla detay</RouterLink
+            >
+          </td>
+        </tr>
+      </table>
     </div>
 
-    <h1 class="text-center py-5 text-danger fw-bold" v-if="isErr">
-      {{ msgError }}
-    </h1>
-
-    <label class="select">
-      <select @change="filterBy()" v-model="selectedValue">
-        <option value="" selected>Tüm</option>
-        <option value="0">onay bekleniyor</option>
-        <option value="1">Kabul edilmiş</option>
-        <option value="2">Reddedilmiş</option>
-        <option value="3">Devam etmekte</option>
-        <option value="4">Tamamlandı</option>
-      </select>
-    </label>
-
-    <table
-      data-aos-duration="1500"
-      data-aos="fade-up"
-      class="responstable"
-      v-if="complaints.length > 0"
-    >
-      <tr>
-        <th>Başlık</th>
-        <th>Kategori</th>
-        <th>Tarih</th>
-        <th>Durum</th>
-        <th>Daha fazla detay</th>
-      </tr>
-
-      <tr
-        data-aos-duration="1000"
-        data-aos="fade-up"
-        v-for="complaint in complaints"
-        :key="complaint.id"
-      >
-        <td class="text-break">{{ complaint.title }}</td>
-        <td class="text-break">{{ complaint.category }}</td>
-        <td class="text-break">{{ formatDate(complaint.createdDate) }}</td>
-        <td class="text-break">
-          <span
-            class="state"
-            :style="{ color: getStatusColor(complaint.status) }"
-          >
-            {{ getStatusMessage(complaint.status) }}
-          </span>
-        </td>
-        <td class="text-break">
-          <RouterLink
-            :to="{ name: 'ComplaintDetails', params: { id: complaint.id } }"
-            class="btn btn-info text-dark"
-            >Daha fazla detay</RouterLink
-          >
-        </td>
-      </tr>
-    </table>
-    <div class="w-100 text-center">
-      <nav class="d-flex justify-content-center">
-        <ul class="pagination">
-          <!-- <li
-            :class="{ disabled: paging == 0, 'page-item': paging > 0 }"
-            class="page-item"
-          >
-            <button
-              @click.prevent="
-                desincreasePage();
-                skipComplaints();
-              "
-              class="page-link"
-            >
-              Previous
-            </button>
-          </li> -->
-          <li
-            class="page-item"
-            aria-current="page"
-            v-for="(item, index) in arrayNumbers"
-            :key="index"
-          >
-            <button
-              :class="{ 'page-link active': x }"
-              @click.prevent="skipComplaints(index)"
-              class="page-link"
-            >
-              {{ index + 1 }}
-            </button>
-          </li>
-
-          <!-- <li
-            :class="{ disabled: !noMoreData, 'page-item': noMoreData == true }"
-            class="page-item"
-          >
-            <button
-              @click.prevent="
-                increasePage();
-                skipComplaints();
-                checkForMoreData();
-              "
-              class="page-link"
-            >
-              Next
-            </button>
-          </li> -->
-        </ul>
-      </nav>
+    <div class="pagination py-4 d-flex justify-content-center">
+      <vue-awesome-paginate
+        v-model="currentPage"
+        :total-items="totalComplaints"
+        :items-per-page="itemsPerPage"
+        :max-pages-shown="5"
+        @page-clicked="handlePageChange()"
+        hidePrevNextWhenEnds
+        :onchange="goToUp()"
+        :container-class="'pagination-container'"
+      />
     </div>
   </main>
 </template>
@@ -150,23 +126,42 @@ import axios from "axios";
 import { useCookies } from "vue3-cookies";
 
 export default {
+  name: "PagingComplaints",
   data() {
     return {
       complaints: [],
-      cookies: useCookies().cookies,
-      isLoading: false,
+      currentPage: 1,
+      itemsPerPage: 20,
+      totalComplaints: 0,
+      isLoading: true,
+      isStaff: useCookies().cookies.get("isStaff"),
       isErr: false,
-      msgError: "",
+      cookies: useCookies().cookies,
       selectedValue: "",
-      paging: 0,
-      noMoreData: true,
-      pageNumbers: 0,
-      currentPage: 0,
-      arrayNumbers: [],
-      x: false,
     };
   },
   methods: {
+    async fetchData() {
+      try {
+        const response = await axios.get(`${this.API}/api/Complaints`, {
+          headers: {
+            Authorization: `Bearer ${this.isAllow}`,
+            "Content-Type": "application/json",
+          },
+        });
+        this.complaints = response.data;
+        this.totalComplaints = response.data.length;
+        this.pagesShown = Math.ceil(this.totalComplaints / this.itemsPerPage);
+        this.isLoading = false;
+      } catch (error) {
+        this.isLoading = false;
+        this.isErr = true;
+        this.msgError = "İşlem sırasında bir hata oluştu";
+      }
+    },
+    handlePageChange(data) {
+      this.currentPage = data.currentPage;
+    },
     getStatusMessage(status) {
       if (status === 0) {
         return "onay bekleniyor";
@@ -200,47 +195,6 @@ export default {
       const day = date.getDate().toString().padStart(2, "0");
       return `${year}-${month}-${day}`;
     },
-    increasePage() {
-      this.paging++;
-    },
-    desincreasePage() {
-      this.paging--;
-      this.noMoreData = true;
-    },
-
-    async skipComplaints(index) {
-      try {
-        const response = await axios.get(
-          `${this.API}/api/Complaints/Paging?skip=${index || 0}&take=5`,
-          {
-            headers: {
-              Authorization: `Bearer ${this.isAllow}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        console.log(index);
-        // console.log(this.currentPage);
-
-        // if (index == this.currentPage) {
-        //   this.x = true;
-        // } else {
-        //   this.x = false;
-        // }
-        this.isLoading = false;
-        this.complaints = response.data.items;
-        this.pageNumbers = response.data.total / 5;
-        const arrayLength = Math.ceil(this.pageNumbers);
-        const number = "item";
-        this.arrayNumbers = [...Array(arrayLength)].fill(number);
-        window.scrollTo(0, 150);
-      } catch (error) {
-        this.isLoading = false;
-        this.isErr = true;
-        this.msgError = "İşlem sırasında bir hata oluştu";
-      }
-    },
-
     async filterBy() {
       try {
         if (this.selectedValue === 0) {
@@ -255,7 +209,7 @@ export default {
           this.selectedValue = "";
         }
         const response = await axios.get(
-          `${this.API}/api/Complaints/Paging?skip=0&status=${this.selectedValue}&take=5`,
+          `${this.API}/api/Complaints/Paging?status=${this.selectedValue}`,
           {
             headers: {
               Authorization: `Bearer ${this.isAllow}`,
@@ -263,22 +217,36 @@ export default {
             },
           }
         );
+        this.currentPage = 1;
         this.complaints = response.data.items;
-
-        console.log(this.complaints);
+        this.totalComplaints = response.data.total;
+        this.pagesShown = Math.ceil(this.totalComplaints / this.itemsPerPage);
+        this.isLoading = false;
       } catch (error) {
-        console.log(error);
+        this.isLoading = false;
+        this.isErr = true;
+        this.msgError = "İşlem sırasında bir hata oluştu";
       }
     },
+    goToUp() {
+      window.scrollTo(0, 0);
+    },
   },
-
-  mounted() {
-    this.skipComplaints();
+  computed: {
+    displayedComplaints() {
+      const startIndex =
+        this.currentPage * this.itemsPerPage - this.itemsPerPage;
+      const endIndex = startIndex + this.itemsPerPage;
+      return this.complaints.slice(startIndex, endIndex);
+    },
+  },
+  created() {
+    this.fetchData();
   },
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 $table-breakpoint: 480px;
 $table-background-color: #fff;
 $table-text-color: #024457;
@@ -290,6 +258,10 @@ $table-highlight-color: #eaf3f3;
 $table-header-background-color: #167f92;
 $table-header-text-color: #fff;
 $table-header-border: 1px solid #fff;
+
+main {
+  min-height: 100vh;
+}
 
 @mixin responstable(
   $breakpoint: $table-breakpoint,
@@ -377,6 +349,22 @@ $table-header-border: 1px solid #fff;
   }
 }
 
+.scroll {
+  max-height: 400px;
+  overflow-y: overlay;
+
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: #f1f1f1;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 5px;
+  }
+}
+
 @include responstable(
   $border-radius: $table-border-radius,
   $highlight-color: $table-highlight-color,
@@ -390,6 +378,7 @@ $duration: 1.4s;
 
 .spinner-container {
   padding-top: 100px;
+  height: 90vh;
 }
 
 .spinner {
@@ -497,5 +486,36 @@ select::-ms-expand {
 
 .page-link {
   box-shadow: none;
+}
+.pagination-container {
+  display: flex;
+  column-gap: 10px;
+}
+
+.next-button,
+.back-button {
+  font-size: 20px;
+}
+
+.paginate-buttons {
+  height: 40px;
+  width: 40px;
+  border-radius: 20px;
+  cursor: pointer;
+  background-color: rgb(242, 242, 242);
+  border: 1px solid rgb(217, 217, 217);
+  color: black;
+}
+.paginate-buttons:hover {
+  background-color: #d8d8d8;
+}
+.active-page {
+  background-color: #3498db;
+  border: 1px solid #3498db;
+  color: white;
+  font-weight: bold;
+}
+.active-page:hover {
+  background-color: #2988c8;
 }
 </style>

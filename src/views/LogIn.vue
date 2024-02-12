@@ -102,15 +102,7 @@ export default {
           showConfirmButton: false,
           timer: 1200,
         });
-        if (response.data.isStaff == true) {
-          setTimeout(() => {
-            location.replace("/admin");
-          }, 1200);
-        } else {
-          setTimeout(() => {
-            location.replace("/complaints");
-          }, 1200);
-        }
+        location.replace("/complaints");
       } catch (error) {
         Swal.fire({
           icon: "error",
@@ -124,7 +116,6 @@ export default {
       if (inputElement) {
         inputElement.removeAttribute("readonly");
       }
-      console.log(inputElement);
     },
     removeReadonlyPass() {
       const inputElement = this.$refs.Pass;

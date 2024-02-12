@@ -2,10 +2,7 @@
   <div>
     <nav class="navbar navbar-expand-lg bg-dark">
       <div class="container">
-        <RouterLink
-          class="navbar-brand pe-5"
-          :to="isStaff ? '/admin' : '/complaints'"
-        >
+        <RouterLink class="navbar-brand pe-5" to="/complaints">
           <i class="fa-solid fa-phone fa-2xl text-primary"></i>
         </RouterLink>
         <button
@@ -25,9 +22,7 @@
         >
           <ul class="navbar-nav mb-2 mb-lg-0 text-light">
             <li v-if="this.isAllow" class="nav-item">
-              <RouterLink
-                class="nav-link"
-                :to="isStaff ? '/admin' : '/complaints'"
+              <RouterLink class="nav-link" to="/complaints"
                 >Tüm Şikayetler
               </RouterLink>
             </li>

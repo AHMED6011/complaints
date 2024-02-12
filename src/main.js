@@ -7,6 +7,9 @@ import App from "./App.vue";
 import router from "./router";
 import { useCookies } from "vue3-cookies";
 
+import "vue-awesome-paginate/dist/style.css";
+import VueAwesomePaginate from "vue-awesome-paginate";
+
 const cookies = useCookies().cookies;
 
 const isAllowed = cookies.get("myCookie");
@@ -22,6 +25,8 @@ app.config.globalProperties.API = "https://complaintapi.kodunya.com";
 app.use(createPinia());
 
 app.use(useCookies);
+
+app.use(VueAwesomePaginate);
 
 app.use(router);
 

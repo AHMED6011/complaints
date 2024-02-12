@@ -37,9 +37,7 @@ const router = createRouter({
       path: "/",
       name: "Login",
       beforeEnter: (to, from, next) => {
-        if (isStaff === "true") {
-          next("/admin");
-        } else if (isAllowed) {
+        if (isAllowed) {
           next("/complaints");
         } else {
           next();
@@ -71,27 +69,12 @@ const router = createRouter({
       },
       component: () => import("../views/MyComplaints.vue"),
     },
-
-    {
-      path: "/admin",
-      name: "admin",
-      beforeEnter: (to, from, next) => {
-        if (isAllowed && isStaff == "true") {
-          next();
-        } else {
-          next("/");
-        }
-      },
-      component: () => import("../views/AdminComplaints.vue"),
-    },
     {
       path: "/manageAdmins",
       name: "manageAdmins",
       beforeEnter: (to, from, next) => {
-        if (mangeAdmins === "true") {
+        if (mangeAdmins == "true") {
           next();
-        } else if (mangeAdmins == "true" || isStaff == "true") {
-          next("/admin");
         } else {
           next("/complaints");
         }
