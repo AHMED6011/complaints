@@ -2,9 +2,26 @@
   <main>
     <div class="container-fluid">
       <div class="row d-flex justify-content-evenly py-3">
-        <div class="col-3 d-flex justify-content-start p-0">
+        <div
+          class="col-md-7 col-12 offset-0 offset-md-2 mb-3 d-flex d-md-none justify-sm-content-start justify-content-center p-0"
+        >
+          <h1
+            class="header-title text-center text-primary fw-bold"
+            v-if="complaints.length > 0"
+          >
+            <span v-if="isStaff == 'true'" style="padding: 0 5px">Admin</span>
+            Tüm Şikayetler
+          </h1>
+        </div>
+        <div
+          class="col-md-3 col-12 d-flex justify-sm-content-start justify-content-center p-0"
+        >
           <label class="select">
-            <select @change="filterBy()" v-model="selectedValue">
+            <select
+              class="rounded"
+              @change="filterBy()"
+              v-model="selectedValue"
+            >
               <option value="" selected>Tüm</option>
               <option value="0">onay bekleniyor</option>
               <option value="1">Kabul edilmiş</option>
@@ -14,14 +31,14 @@
             </select>
           </label>
         </div>
-        <div class="col-7 offset-2 d-flex justify-content-start p-0">
+        <div
+          class="col-md-7 d-none col-12 offset-0 offset-md-2 d-md-flex justify-sm-content-start justify-content-center p-0"
+        >
           <h1
-            class="text-center text-primary fw-bold"
+            class="header-title text-center text-primary fw-bold"
             v-if="complaints.length > 0"
           >
-            <span v-if="isStaff == 'true'" style="margin-left: -100px"
-              >Admin</span
-            >
+            <span v-if="isStaff == 'true'">Admin</span>
             Tüm Şikayetler
           </h1>
         </div>
@@ -33,7 +50,6 @@
       >
         Henüz Şikayet Yok
       </h1>
-
       <div class="container spinner-container" v-if="isLoading">
         <div class="row justify-content-center align-items-centers">
           <div class="col-12 text-center">
@@ -63,31 +79,26 @@
       </h1>
     </div>
     <div class="scroll">
-      <table
-        data-aos-duration="1500"
-        data-aos="fade-up"
-        class="responstable"
-        v-if="complaints.length > 0"
-      >
+      <table class="responstable" v-if="complaints.length > 0">
         <tr>
           <th>Başlık</th>
-          <th>Kategori</th>
-          <th>Tarih</th>
-          <th>Durum</th>
-          <th>Daha fazla detay</th>
+          <th class="d-none d-sm-table-cell">Kategori</th>
+          <th class="d-none d-md-table-cell">Tarih</th>
+          <th class="d-none d-md-table-cell">Durum</th>
+          <th class="d-table-cell">Daha fazla detay</th>
         </tr>
 
         <tr v-for="(complaint, index) in displayedComplaints" :key="index">
           <td class="text-break">
             {{ complaint.title }}
           </td>
-          <td class="text-break">
+          <td class="text-break d-none d-sm-table-cell">
             {{ complaint.category }}
           </td>
-          <td class="text-break">
+          <td class="text-break d-none d-md-table-cell">
             {{ formatDate(complaint.createdDate) }}
           </td>
-          <td class="text-break">
+          <td class="text-break d-none d-md-table-cell">
             <span
               class="state"
               :style="{ color: getStatusColor(complaint.status) }"
@@ -112,9 +123,10 @@
         :total-items="totalComplaints"
         :items-per-page="itemsPerPage"
         :max-pages-shown="5"
-        @page-clicked="handlePageChange()"
-        hidePrevNextWhenEnds
-        :onchange="goToUp()"
+        @page-clicked="
+          filterBy();
+          handlePageChange();
+        "
         :container-class="'pagination-container'"
       />
     </div>
@@ -124,6 +136,8 @@
 <script>
 import axios from "axios";
 import { useCookies } from "vue3-cookies";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 export default {
   name: "PagingComplaints",
@@ -141,17 +155,41 @@ export default {
     };
   },
   methods: {
-    async fetchData() {
+    async filterBy() {
       try {
-        const response = await axios.get(`${this.API}/api/Complaints`, {
-          headers: {
-            Authorization: `Bearer ${this.isAllow}`,
-            "Content-Type": "application/json",
-          },
-        });
-        this.complaints = response.data;
-        this.totalComplaints = response.data.length;
-        this.pagesShown = Math.ceil(this.totalComplaints / this.itemsPerPage);
+        this.currentPage = 1;
+        if (this.selectedValue === 0) {
+          this.selectedValue = 0;
+        } else if (this.selectedValue === 1) {
+          this.selectedValue = 1;
+        } else if (this.selectedValue === 2) {
+          this.selectedValue = 2;
+        } else if (this.selectedValue === 3) {
+          this.selectedValue = 3;
+        } else if (this.selectedValue === "") {
+          this.selectedValue = "";
+        }
+        const response = await axios.get(
+          `${this.API}/api/Complaints/Paging?skip=${this.currentPage}&status=${this.selectedValue}`,
+          {
+            headers: {
+              Authorization: `Bearer ${this.isAllow}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.data.total == 0) {
+          this.complaints = response.data.items;
+          this.totalComplaints = response.data.total;
+          this.pagesShown = Math.ceil(this.totalComplaints / this.itemsPerPage);
+        } else if (response.data.total == 0) {
+          toast.warning("Şikayet Bulunamadı", {
+            autoClose: 2500,
+          });
+          this.isErr = false;
+        }
+
         this.isLoading = false;
       } catch (error) {
         this.isLoading = false;
@@ -195,42 +233,6 @@ export default {
       const day = date.getDate().toString().padStart(2, "0");
       return `${year}-${month}-${day}`;
     },
-    async filterBy() {
-      try {
-        if (this.selectedValue === 0) {
-          this.selectedValue = 0;
-        } else if (this.selectedValue === 1) {
-          this.selectedValue = 1;
-        } else if (this.selectedValue === 2) {
-          this.selectedValue = 2;
-        } else if (this.selectedValue === 3) {
-          this.selectedValue = 3;
-        } else if (this.selectedValue === "") {
-          this.selectedValue = "";
-        }
-        const response = await axios.get(
-          `${this.API}/api/Complaints/Paging?status=${this.selectedValue}`,
-          {
-            headers: {
-              Authorization: `Bearer ${this.isAllow}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        this.currentPage = 1;
-        this.complaints = response.data.items;
-        this.totalComplaints = response.data.total;
-        this.pagesShown = Math.ceil(this.totalComplaints / this.itemsPerPage);
-        this.isLoading = false;
-      } catch (error) {
-        this.isLoading = false;
-        this.isErr = true;
-        this.msgError = "İşlem sırasında bir hata oluştu";
-      }
-    },
-    goToUp() {
-      window.scrollTo(0, 0);
-    },
   },
   computed: {
     displayedComplaints() {
@@ -240,8 +242,9 @@ export default {
       return this.complaints.slice(startIndex, endIndex);
     },
   },
+
   created() {
-    this.fetchData();
+    this.filterBy();
   },
 };
 </script>
@@ -350,7 +353,7 @@ main {
 }
 
 .scroll {
-  max-height: 400px;
+  height: 400px;
   overflow-y: overlay;
 
   &::-webkit-scrollbar {
@@ -517,5 +520,28 @@ select::-ms-expand {
 }
 .active-page:hover {
   background-color: #2988c8;
+}
+
+@media (max-width: 567px) {
+  .header-title {
+    font-size: 25px;
+    display: flex;
+    align-items: center;
+  }
+  .select {
+    height: 60px;
+  }
+
+  .responstable {
+    tr {
+      td {
+        margin: auto;
+
+        a {
+          font-size: 15px;
+        }
+      }
+    }
+  }
 }
 </style>

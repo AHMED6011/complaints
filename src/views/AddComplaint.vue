@@ -5,7 +5,7 @@
         <div class="col-12 main-bg">
           <h1>Şehrimizi Güzelleştir</h1>
         </div>
-        <div class="col-12 my-5 add-box">
+        <div class="col-12 my-md-5 add-box">
           <div
             class="container position-relative d-flex justify-content-center"
           >
@@ -14,7 +14,7 @@
               novalidate
               @submit.prevent="submitForm"
             >
-              <div class="col-8">
+              <div class="col-12 col-md-8">
                 <textarea
                   cols="30"
                   rows="10"
@@ -95,7 +95,7 @@
                   </p>
                 </label>
               </div>
-              <div class="col-8">
+              <div class="col-12 col-md-8">
                 <textarea
                   type="text"
                   class="form-control"
@@ -106,7 +106,7 @@
                   required
                 ></textarea>
               </div>
-              <div class="col-8">
+              <div class="col-12 col-md-8">
                 <button class="btn btn-primary" @click.prevent="addComplaint">
                   Gönder
                 </button>
@@ -312,6 +312,14 @@ form {
 
   .custum-file-upload input {
     display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .main-bg {
+    h1 {
+      font-size: 30px;
+    }
   }
 }
 </style>

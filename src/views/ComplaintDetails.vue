@@ -24,41 +24,44 @@
       </div>
     </div>
 
-    <div class="container">
+    <div class="container" v-else>
       <div class="header-title row pt-5 pb-3">
-        <h3 class="text-center col-6 text-primary fw-bold">
+        <h3
+          class="text-center col-md-6 col-12 mb-4 mb-md-0 text-primary fw-bold"
+        >
           Şikayet Detayları
         </h3>
 
         <div
-          class="actions col-4 offset-2 justify-content-end"
+          class="actions col-12 offset-0 offset-lg-2 col-md-6 col-lg-4 justify-content-around justify-md-content-end"
           :class="IsStaff()"
+          v-if="isStaff"
         >
           <button
             @click.prevent="accepted()"
             v-if="complaint.status === 0 && canAccept == 'true'"
-            class="btn m-2 text-light fw-bold bg-success"
+            class="btn mx-1 mx-lg-0 text-light fw-bold bg-success"
           >
             Kabul et
           </button>
           <button
             @click.prevent="rejected()"
             v-if="complaint.status === 0 && canReject == 'true'"
-            class="btn m-2 text-light fw-bold bg-danger"
+            class="btn mx-1 mx-lg-0 text-light fw-bold bg-danger"
           >
             Reddet
           </button>
           <button
             @click.prevent="inProgress()"
             v-if="complaint.status === 1 && canInProgress == 'true'"
-            class="btn m-2 text-light fw-bold bg-warning"
+            class="btn mx-1 mx-lg-0 text-light fw-bold bg-warning"
           >
             Devam ediyor
           </button>
           <button
             @click.prevent="closed()"
             v-if="complaint.status === 3 && canClose == 'true'"
-            class="btn m-2 text-light fw-bold bg-dark"
+            class="btn mx-1 mx-lg-0 text-light fw-bold bg-dark"
           >
             Tamamlandı
           </button>
@@ -71,14 +74,25 @@
               canInProgress == 'true' &&
               canClose == 'true'
             "
-            class="btn m-2 text-light fw-bold bg-danger"
+            class="btn mx-1 mx-lg-0 text-light fw-bold bg-danger"
           >
             Şikayet Sil
           </button>
         </div>
       </div>
       <div class="row details justify-content-between">
-        <div class="col-6">
+        <div
+          class="col-lg-12 mb-4 d-flex d-lg-none img-parent offset-lg-1"
+          v-if="complaint.image"
+        >
+          <img
+            class="img-fluid"
+            :src="`${this.API}/api/Files/${complaint.image}`"
+            alt=""
+          />
+        </div>
+
+        <div class="col-12 col-lg-6">
           <ul class="list-group list-group-horizontal">
             <li class="list-group-item border-0">
               <h6 class="fw-bold p-1">Başlık</h6>
@@ -137,7 +151,10 @@
           </ul>
         </div>
 
-        <div class="col-5 img-parent offset-1" v-if="complaint.image">
+        <div
+          class="col-lg-5 d-none d-lg-flex img-parent"
+          v-if="complaint.image"
+        >
           <img
             class="img-fluid"
             :src="`${this.API}/api/Files/${complaint.image}`"
@@ -147,14 +164,14 @@
 
         <hr class="mt-2" />
 
-        <div class="col-6 text-center bg-color">
+        <div class="col-12 col-lg-6 text-center bg-color">
           <h6 class="fw-bold">Açıklama</h6>
           <p class="text-secondary text-break">
             {{ complaint.description }}
           </p>
         </div>
 
-        <div class="col-6 user-details bg-color pb-5">
+        <div class="col-12 col-lg-6 user-details bg-color pb-5">
           <h5 class="text-center fw-bold">Geçimiş</h5>
           <ul class="rounded list-group">
             <li
@@ -340,12 +357,14 @@ export default {
     },
     formatDate(dateString) {
       const date = new Date(dateString);
-      const hours = date.getHours();
-      const minutes = date.getMinutes();
+
       const year = date.getFullYear();
       const month = (date.getMonth() + 1).toString().padStart(2, "0");
       const day = date.getDate().toString().padStart(2, "0");
-      return `${year}-${month}-${day} ${hours}:${minutes}`;
+      const hours = (date.getHours() + 3).toString().padStart(2, "0");
+      const minutes = date.getMinutes().toString().padStart(2, "0");
+
+      return `${year}/${month}/${day} ${hours}:${minutes}`;
     },
 
     IsStaff() {
@@ -415,7 +434,6 @@ p {
 .details {
   ul {
     display: block;
-    margin-right: 35px;
     li {
       width: 100%;
       display: flex;
@@ -444,6 +462,7 @@ p {
   padding: 10px;
   border-radius: 10px;
   display: flex;
+  justify-content: center;
 
   & img {
     max-width: 100%;

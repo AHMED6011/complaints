@@ -22,21 +22,21 @@
         >
           <ul class="navbar-nav mb-2 mb-lg-0 text-light">
             <li v-if="this.isAllow" class="nav-item">
-              <RouterLink class="nav-link" to="/complaints"
+              <RouterLink class="nav-link text-center" to="/complaints"
                 >Tüm Şikayetler
               </RouterLink>
             </li>
             <li v-if="!isStaff == true && this.isAllow" class="nav-item">
-              <RouterLink class="nav-link" to="/AddComplaint"
+              <RouterLink class="nav-link text-center" to="/AddComplaint"
                 >Şikayet Ekle</RouterLink
               >
             </li>
             <li class="nav-item" v-if="isManageAdmins">
-              <RouterLink class="nav-link" to="/manageAdmins"
+              <RouterLink class="nav-link text-center" to="/manageAdmins"
                 >Tüm Yöneticiler</RouterLink
               >
             </li>
-            <li v-if="this.isAllow" class="nav-item">
+            <li v-if="this.isAllow" class="nav-item text-end">
               <button
                 class="btn text-light fs-5 ms-3"
                 @click.prevent="deleteAccount"

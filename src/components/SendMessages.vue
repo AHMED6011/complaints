@@ -75,18 +75,17 @@ export default {
       this.complaint.messages.push(response.data);
       this.msg = "";
     },
+
     formatDate(dateString) {
       const date = new Date(dateString);
-      const hours = date.getHours();
-      const minutes = date.getMinutes();
+
       const year = date.getFullYear();
       const month = (date.getMonth() + 1).toString().padStart(2, "0");
       const day = date.getDate().toString().padStart(2, "0");
+      const hours = (date.getHours() + 3).toString().padStart(2, "0");
+      const minutes = date.getMinutes().toString().padStart(2, "0");
 
-      const formattedHours = hours < 10 ? `0${hours}` : hours;
-      const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-
-      return `${year}/${month}/${day} ${formattedHours}:${formattedMinutes}`;
+      return `${year}/${month}/${day} ${hours}:${minutes}`;
     },
     getClass(userID) {
       return userID == this.complaint.userId
