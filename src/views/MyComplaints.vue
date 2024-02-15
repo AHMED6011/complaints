@@ -145,7 +145,7 @@ export default {
     return {
       complaints: [],
       currentPage: 1,
-      itemsPerPage: 20,
+      itemsPerPage: 5,
       totalComplaints: 0,
       isLoading: true,
       isStaff: useCookies().cookies.get("isStaff"),
@@ -262,10 +262,6 @@ $table-header-background-color: #167f92;
 $table-header-text-color: #fff;
 $table-header-border: 1px solid #fff;
 
-main {
-  min-height: 100vh;
-}
-
 @mixin responstable(
   $breakpoint: $table-breakpoint,
   $background-color: $table-background-color,
@@ -353,7 +349,7 @@ main {
 }
 
 .scroll {
-  height: 400px;
+  max-height: 400px;
   overflow-y: overlay;
 
   &::-webkit-scrollbar {

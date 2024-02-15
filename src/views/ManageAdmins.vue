@@ -313,7 +313,7 @@ export default {
       category: "",
       name: "",
       currentPage: 1,
-      itemsPerPage: 10,
+      itemsPerPage: 5,
       totalAdmins: 0,
       email: "",
       phoneNumber: "",
@@ -379,8 +379,7 @@ export default {
           this.emptyArray = "";
         } else if (result.data.total === 0) {
           this.spinner = false;
-          this.admins = [];
-          return (this.emptyArray = `Bu kullanıcı adına '${this.searchedValue}' sahip herhangi bir yönetici bulunmamaktadır !!`);
+          return (this.emptyArray = `Yönetici bulunamadı '${this.searchedValue}' !!`);
         }
 
         this.spinner = true;
@@ -619,7 +618,7 @@ $table-header-border: 1px solid #fff;
 }
 
 .scroll {
-  height: 400px;
+  max-height: 400px;
   overflow-y: overlay;
 
   &::-webkit-scrollbar {
