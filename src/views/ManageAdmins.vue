@@ -25,7 +25,7 @@
       </div>
     </div>
 
-    <h4 class="text-center">{{ emptyArray }}</h4>
+    <h4 class="text-center text-danger">{{ emptyArray }}</h4>
 
     <div
       class="container spinner-container"
@@ -121,6 +121,7 @@
                         class="btn-close"
                         data-bs-dismiss="modal"
                         aria-label="Close"
+                        @click.prevent="cancelButton()"
                       ></button>
                     </div>
                     <div class="modal-body">
@@ -263,6 +264,7 @@
                         type="button"
                         class="btn btn-secondary"
                         data-bs-dismiss="modal"
+                        @click.prevent="cancelButton()"
                       >
                         İptal et
                       </button>
@@ -474,11 +476,15 @@ export default {
       }
     },
 
+    cancelButton() {
+      this.getAdmins();
+    },
+
     async updateData() {
       try {
         this.selectedAdmin.password = "";
 
-        const response = await axios.put(
+        await axios.put(
           `${this.API}/api/Users/${this.id}`,
 
           this.selectedAdmin,
