@@ -172,12 +172,16 @@ export default {
             image: responseImg.data,
           };
 
-          await axios.post(`${this.API}/api/Complaints`, sendData, {
-            headers: {
-              Authorization: `Bearer ${this.isAllow}`,
-              "Content-Type": "application/json",
-            },
-          });
+          const response = await axios.post(
+            `${this.API}/api/Complaints`,
+            sendData,
+            {
+              headers: {
+                Authorization: `Bearer ${this.isAllow}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
 
           swal(
             {
@@ -206,7 +210,7 @@ export default {
         Swal.fire({
           icon: "error",
           title: "Oops...",
-          text: `${error.response.data}`,
+          text: `${error.message.data}`,
         });
       }
     },

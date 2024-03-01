@@ -2,7 +2,7 @@
   <div class="create-admin">
     <button
       type="button"
-      class="btn btn-primary"
+      class="btn custom-bg-primary"
       data-bs-toggle="modal"
       data-bs-target="#addAdmin"
     >
@@ -132,7 +132,7 @@
             </button>
             <button
               type="button"
-              class="btn btn-primary"
+              class="btn custom-bg-primary"
               @click="addNewAdmin()"
             >
               Ekle
@@ -263,7 +263,7 @@ export default {
         Swal.fire({
           icon: "error",
           title: "Oops...",
-          text: `${error.response.data}`,
+          text: `${error.message.data}`,
         });
       }
     },

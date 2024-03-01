@@ -27,7 +27,7 @@
     <div class="container" v-else>
       <div class="header-title row pt-5 pb-3">
         <h3
-          class="text-center col-md-6 col-12 mb-4 mb-md-0 text-primary fw-bold"
+          class="text-center col-md-6 col-12 mb-4 mb-md-0 custom-text-primary fw-bold"
         >
           Şikayet Detayları
         </h3>
@@ -261,7 +261,7 @@ export default {
         Swal.fire({
           icon: "error",
           title: "Oops...",
-          text: `${error.response.data}`,
+          text: `${error.message.data}`,
         });
       }
     },
@@ -277,7 +277,7 @@ export default {
         Swal.fire({
           icon: "error",
           title: "Oops...",
-          text: `${error.response.data}`,
+          text: `${error.message.data}`,
         });
       }
     },
@@ -401,7 +401,7 @@ export default {
   position: fixed;
   bottom: 50px;
   right: 50px;
-  background-color: #0d6efd;
+  background-color: #167f92;
   padding: 18px 15px;
   border-radius: 50%;
   color: white;
@@ -410,7 +410,7 @@ export default {
 
   &:hover,
   &:active {
-    background-color: #0254ce;
+    background-color: #167f92;
     box-shadow: 0px 0px 10px 6px #9f9f9f;
     transform: scale(1.1);
   }

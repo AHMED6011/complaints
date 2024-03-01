@@ -107,7 +107,7 @@ export default {
         Swal.fire({
           icon: "error",
           title: "Oops...",
-          text: `${error.response.data}`,
+          text: `${error.message.data}`,
         });
       }
     },

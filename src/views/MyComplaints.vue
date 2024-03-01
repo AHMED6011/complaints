@@ -1,12 +1,16 @@
 <template>
-  <main>
-    <div class="container-fluid">
+  <div class="container-fluid">
+    <div class="parent-loader" v-if="loading && isLoaded === false">
+      <div class="custom-loader"></div>
+    </div>
+
+    <div class="p-fluid">
       <div class="row d-flex justify-content-evenly py-3">
         <div
           class="col-md-7 col-12 offset-0 offset-md-2 mb-3 d-flex d-md-none justify-sm-content-start justify-content-center p-0"
         >
           <h1
-            class="header-title text-center text-primary fw-bold"
+            class="header-title text-center fw-bold"
             v-if="complaints.length > 0"
           >
             <span v-if="isStaff == 'true'" style="padding: 0 5px">Admin</span>
@@ -35,7 +39,7 @@
           class="col-md-7 d-none col-12 offset-0 offset-md-2 d-md-flex justify-sm-content-start justify-content-center p-0"
         >
           <h1
-            class="header-title text-center text-primary fw-bold"
+            class="header-title text-center fw-bold"
             v-if="complaints.length > 0"
           >
             <span v-if="isStaff == 'true'">Admin</span>
@@ -43,171 +47,237 @@
           </h1>
         </div>
       </div>
+      <h2 class="text-center py-5 text-danger fw-bold" v-if="complaintsNoFound">
+        Şikayet Bulunamadı
+      </h2>
 
-      <h1
-        class="text-center py-5 text-primary fw-bold"
-        v-if="complaints.length == 0 && isErr == false"
-      >
+      <h1 class="text-center py-5 noComplaints fw-bold" v-if="noComplaints">
         Henüz Şikayet Yok
       </h1>
-      <div class="container spinner-container" v-if="isLoading">
-        <div class="row justify-content-center align-items-centers">
-          <div class="col-12 text-center">
-            <svg
-              class="spinner"
-              width="65px"
-              height="65px"
-              viewBox="0 0 66 66"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                class="path"
-                fill="none"
-                stroke-width="6"
-                stroke-linecap="round"
-                cx="33"
-                cy="33"
-                r="30"
-              ></circle>
-            </svg>
-          </div>
+
+      <h1 class="text-center py-5 text-danger fw-bold" v-if="isLoaded">
+        {{ msg }}
+      </h1>
+      <div class="text-center" v-if="isLoaded && loading">
+        <div class="parent-loader">
+          <div class="custom-loader"></div>
         </div>
       </div>
+      <div v-if="!isErr && complaints.length > 0">
+        <DataTable
+          @sort="onSort($event)"
+          @page="onPage($event)"
+          :totalRecords="totalRecords"
+          :rows="itemsPerPage"
+          :value="complaints"
+          paginator
+          lazy
+          tableStyle="min-width: 50rem"
+        >
+          <Column
+            style="width: 20%"
+            field="title"
+            header="Başlık"
+            sortable
+          ></Column>
+          <Column
+            style="width: 20%"
+            field="category"
+            header="Kategori"
+            sortable
+          ></Column>
+          <Column
+            style="width: 20%"
+            field="createdDate"
+            header="Tarih"
+            sortable
+          >
+            <template #body="createdDate">
+              {{ formatDate(createdDate) }}
+            </template></Column
+          >
 
-      <h1 class="text-center py-5 text-danger fw-bold" v-if="isErr">
-        {{ msgError }}
-      </h1>
+          <Column style="width: 20%" field="status" header="Durum" sortable>
+            <template #body="status">
+              {{ getStatusMessage(status) }}
+            </template>
+          </Column>
+          <Column
+            class="p-sortable-column"
+            style="width: 20%; cursor: default"
+            header="Daha fazla detay
+            "
+          >
+            <template #body="id">
+              <RouterLink
+                :to="{ name: 'ComplaintDetails', params: { id: id.data.id } }"
+              >
+                <Button icon="pi pi-eye" class="eye-icon" aria-label="eye" />
+              </RouterLink>
+            </template>
+          </Column>
+        </DataTable>
+      </div>
     </div>
-    <div class="scroll">
-      <table class="responstable" v-if="complaints.length > 0">
-        <tr>
-          <th>Başlık</th>
-          <th class="d-none d-sm-table-cell">Kategori</th>
-          <th class="d-none d-md-table-cell">Tarih</th>
-          <th class="d-none d-md-table-cell">Durum</th>
-          <th class="d-table-cell">Daha fazla detay</th>
-        </tr>
-
-        <tr v-for="(complaint, index) in displayedComplaints" :key="index">
-          <td class="text-break">
-            {{ complaint.title }}
-          </td>
-          <td class="text-break d-none d-sm-table-cell">
-            {{ complaint.category }}
-          </td>
-          <td class="text-break d-none d-md-table-cell">
-            {{ formatDate(complaint.createdDate) }}
-          </td>
-          <td class="text-break d-none d-md-table-cell">
-            <span
-              class="state"
-              :style="{ color: getStatusColor(complaint.status) }"
-            >
-              {{ getStatusMessage(complaint.status) }}
-            </span>
-          </td>
-          <td class="text-break">
-            <RouterLink
-              :to="{ name: 'ComplaintDetails', params: { id: complaint.id } }"
-              class="btn btn-info text-dark"
-              >Daha fazla detay</RouterLink
-            >
-          </td>
-        </tr>
-      </table>
-    </div>
-
-    <div class="pagination py-4 d-flex justify-content-center">
-      <vue-awesome-paginate
-        v-model="currentPage"
-        :total-items="totalComplaints"
-        :items-per-page="itemsPerPage"
-        :max-pages-shown="5"
-        @page-clicked="
-          filterBy();
-          handlePageChange();
-        "
-        :container-class="'pagination-container'"
-      />
-    </div>
-  </main>
+  </div>
 </template>
 
 <script>
-import axios from "axios";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import Dialog from "primevue/dialog";
+import { defineComponent } from "vue";
 import { useCookies } from "vue3-cookies";
-import { toast } from "vue3-toastify";
-import "vue3-toastify/dist/index.css";
+import axios from "axios";
+import Swal from "sweetalert2";
 
-export default {
-  name: "PagingComplaints",
+export default defineComponent({
+  components: { DataTable, Column, Dialog },
   data() {
     return {
-      complaints: [],
-      currentPage: 1,
-      itemsPerPage: 5,
-      totalComplaints: 0,
-      isLoading: true,
       isStaff: useCookies().cookies.get("isStaff"),
-      isErr: false,
       cookies: useCookies().cookies,
-      selectedValue: "",
+      complaints: [],
+      loading: false,
+      complaintsNoFound: false,
+      noComplaints: false,
+      isErr: true,
+      isLoaded: true,
+      sortedDataType: null,
+      selectedValue: null,
+      itemsPerPage: 20,
+      totalRecords: 0,
+      msg: "",
+      statusMessage: "",
     };
   },
+
   methods: {
-    async filterBy() {
-      try {
-        this.currentPage = 1;
-        if (this.selectedValue === 0) {
-          this.selectedValue = 0;
-        } else if (this.selectedValue === 1) {
-          this.selectedValue = 1;
-        } else if (this.selectedValue === 2) {
-          this.selectedValue = 2;
-        } else if (this.selectedValue === 3) {
-          this.selectedValue = 3;
-        } else if (this.selectedValue === "") {
-          this.selectedValue = "";
-        }
-        const response = await axios.get(
-          `${this.API}/api/Complaints/Paging?skip=${this.currentPage}&status=${this.selectedValue}`,
-          {
-            headers: {
-              Authorization: `Bearer ${this.isAllow}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+    getComplaints(param = "") {
+      this.loading = true;
+      setTimeout(async () => {
+        try {
+          const response = await axios.get(
+            `${this.API}/api/Complaints/Paging?skip=1&status=${param}`,
+            {
+              headers: {
+                Authorization: `Bearer ${this.isAllow}`,
+              },
+            }
+          );
+          this.isLoaded = false;
 
-        if (!response.data.total == 0) {
           this.complaints = response.data.items;
-          this.totalComplaints = response.data.total;
-          this.pagesShown = Math.ceil(this.totalComplaints / this.itemsPerPage);
-        } else if (response.data.total == 0) {
-          toast.warning("Şikayet Bulunamadı", {
-            autoClose: 2500,
-          });
-          this.isErr = false;
+          this.totalRecords = response.data.total;
+          if (!response.data.total == 0) {
+            this.isErr = false;
+          } else if (
+            response.data.total == 0 &&
+            response.status &&
+            this.selectedValue != ""
+          ) {
+            this.complaintsNoFound = true;
+            this.noComplaints = false;
+            this.isErr = false;
+          } else if (
+            response.data.total == 0 &&
+            response.status &&
+            this.selectedValue == ""
+          ) {
+            this.noComplaints = true;
+          }
+          this.loading = false;
+        } catch (error) {
+          this.isErr = true;
+          this.loading = false;
+          this.isLoaded = true;
+          this.msg = "İşlem sırasında bir hata oluştu";
         }
+      }, 400);
+    },
+    onSort(event) {
+      this.loading = true;
 
-        this.isLoading = false;
+      try {
+        setTimeout(async () => {
+          if (event.sortOrder === -1) {
+            this.sortedDataType = "ZA";
+          } else if (event.sortOrder === 1) {
+            this.sortedDataType = "AZ";
+          }
+          const response = await axios.get(
+            `${this.API}/api/Complaints/Paging?SortField=${event.sortField}&SortType=${this.sortedDataType}&take=${this.itemsPerPage}`,
+            {
+              headers: {
+                Authorization: `Bearer ${this.isAllow}`,
+              },
+            }
+          );
+
+          this.complaints = response.data.items;
+          this.totalRecords = response.data.total;
+          this.loading = false;
+        }, Math.random() * 200 + 150);
       } catch (error) {
-        this.isLoading = false;
-        this.isErr = true;
-        this.msgError = "İşlem sırasında bir hata oluştu";
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: `${error.message}`,
+        });
       }
     },
-    handlePageChange(data) {
-      this.currentPage = data.currentPage;
+    onPage(event) {
+      this.loading = true;
+      window.scrollTo(0, 0);
+
+      setTimeout(async () => {
+        try {
+          const response = await axios.get(
+            `${this.API}/api/Complaints/Paging?skip=${event.page + 1}&take=${
+              this.itemsPerPage
+            }&status=${this.selectedValue}`,
+            {
+              headers: {
+                Authorization: `Bearer ${this.isAllow}`,
+              },
+            }
+          );
+          this.loading = false;
+          this.complaints = response.data.items;
+        } catch (error) {
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `${error.message}`,
+          });
+        }
+      }, 250);
+    },
+    filterBy() {
+      this.loading = true;
+
+      if (this.selectedValue === 0) {
+        this.selectedValue = 0;
+      } else if (this.selectedValue === 1) {
+        this.selectedValue = 1;
+      } else if (this.selectedValue === 2) {
+        this.selectedValue = 2;
+      } else if (this.selectedValue === 3) {
+        this.selectedValue = 3;
+      } else if (this.selectedValue === null) {
+        this.selectedValue = "";
+      }
+
+      this.getComplaints(this.selectedValue);
     },
     getStatusMessage(status) {
-      if (status === 0) {
+      if (status.data.status === 0) {
         return "onay bekleniyor";
-      } else if (status === 1) {
+      } else if (status.data.status === 1) {
         return "Kabul edilmiş";
-      } else if (status === 2) {
+      } else if (status.data.status === 2) {
         return "Reddedilmiş";
-      } else if (status === 3) {
+      } else if (status.data.status === 3) {
         return "Devam etmekte";
       } else {
         return "Tamamlandı";
@@ -227,215 +297,23 @@ export default {
       }
     },
     formatDate(dateString) {
-      const date = new Date(dateString);
+      const date = new Date(dateString.data.createdDate);
       const year = date.getFullYear();
       const month = (date.getMonth() + 1).toString().padStart(2, "0");
       const day = date.getDate().toString().padStart(2, "0");
       return `${year}-${month}-${day}`;
     },
   },
-  computed: {
-    displayedComplaints() {
-      const startIndex =
-        this.currentPage * this.itemsPerPage - this.itemsPerPage;
-      const endIndex = startIndex + this.itemsPerPage;
-      return this.complaints.slice(startIndex, endIndex);
-    },
-  },
-
-  created() {
+  mounted() {
     this.filterBy();
   },
-};
+});
 </script>
 
 <style lang="scss">
-$table-breakpoint: 480px;
-$table-background-color: #fff;
-$table-text-color: #024457;
-$table-outer-border: 1px solid #167f92;
-$table-cell-border: 1px solid #d9e4e6;
-
-$table-border-radius: 10px;
-$table-highlight-color: #eaf3f3;
-$table-header-background-color: #167f92;
-$table-header-text-color: #fff;
-$table-header-border: 1px solid #fff;
-
-@mixin responstable(
-  $breakpoint: $table-breakpoint,
-  $background-color: $table-background-color,
-  $text-color: $table-text-color,
-  $outer-border: $table-outer-border,
-  $cell-border: $table-cell-border,
-  $border-radius: none,
-  $highlight-color: none,
-  $header-background-color: $table-background-color,
-  $header-text-color: $table-text-color,
-  $header-border: $table-cell-border
-) {
-  .responstable {
-    margin: 1em 0;
-    margin-bottom: 80px;
-    width: 100%;
-    overflow: hidden;
-    background: $background-color;
-    color: $text-color;
-    border-radius: $border-radius;
-    border: $outer-border;
-
-    tr {
-      border: $cell-border;
-      &:nth-child(odd) {
-        background-color: $highlight-color;
-      }
-    }
-
-    th {
-      display: none;
-      border: $header-border;
-      background-color: $header-background-color;
-      color: $header-text-color;
-      text-align: center !important;
-      &:first-child {
-        display: table-cell;
-        text-align: center;
-      }
-      &:nth-child(2) {
-        display: table-cell;
-        span {
-          display: none;
-        }
-      }
-    }
-
-    td {
-      display: block;
-      font-weight: bold;
-      max-width: 7em;
-      text-align: center !important;
-
-      a {
-        text-decoration: none;
-        color: #000;
-        font-weight: bold;
-      }
-
-      &:first-child {
-        display: table-cell;
-        text-align: center;
-        border-right: $cell-border;
-      }
-      @media (min-width: $breakpoint) {
-        border: $cell-border;
-      }
-    }
-
-    th,
-    td {
-      text-align: left;
-      margin: 0.5em 1em;
-      @media (min-width: $breakpoint) {
-        display: table-cell;
-        padding: 10px;
-      }
-    }
-  }
-
-  .state {
-    padding: 10px 15px;
-    border-radius: 10px;
-  }
-}
-
-.scroll {
-  max-height: 400px;
-  overflow-y: overlay;
-
-  &::-webkit-scrollbar {
-    width: 10px;
-  }
-  &::-webkit-scrollbar-track {
-    background-color: #f1f1f1;
-  }
-  &::-webkit-scrollbar-thumb {
-    background-color: #888;
-    border-radius: 5px;
-  }
-}
-
-@include responstable(
-  $border-radius: $table-border-radius,
-  $highlight-color: $table-highlight-color,
-  $header-background-color: $table-header-background-color,
-  $header-text-color: $table-header-text-color,
-  $header-border: $table-header-border
-);
-
-$offset: 187;
-$duration: 1.4s;
-
-.spinner-container {
-  padding-top: 100px;
-  height: 90vh;
-}
-
-.spinner {
-  animation: rotator $duration linear infinite;
-}
-
-@keyframes rotator {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(270deg);
-  }
-}
-
-.path {
-  stroke-dasharray: $offset;
-  stroke-dashoffset: 0;
-  transform-origin: center;
-  animation: dash $duration ease-in-out infinite,
-    colors ($duration * 4) ease-in-out infinite;
-}
-
-@keyframes colors {
-  0% {
-    stroke: #4285f4;
-  }
-  25% {
-    stroke: #de3e35;
-  }
-  50% {
-    stroke: #f7c223;
-  }
-  75% {
-    stroke: #1b9a59;
-  }
-  100% {
-    stroke: #4285f4;
-  }
-}
-
-@keyframes dash {
-  0% {
-    stroke-dashoffset: $offset;
-  }
-  50% {
-    stroke-dashoffset: $offset/4;
-    transform: rotate(135deg);
-  }
-  100% {
-    stroke-dashoffset: $offset;
-    transform: rotate(450deg);
-  }
-}
-
 select {
   appearance: none;
-  background-color: #4285f4;
+  background-color: #167f92;
   border: 0;
   outline: 0;
   color: inherit;
@@ -474,70 +352,165 @@ select::-ms-expand {
     animation: bounce 0.5s infinite;
   }
 }
+.p-datatable-table {
+  border-radius: 10px;
+}
+
+.p-datatable-thead {
+  tr {
+    .p-sortable-column {
+      background-color: #167f92 !important;
+      margin-left: 5px !important;
+
+      &:first-child {
+        border-top-left-radius: 5px !important;
+      }
+      &:last-child {
+        border-top-right-radius: 5px !important;
+      }
+    }
+  }
+}
+
+.header-title,
+.noComplaints {
+  color: #167f92;
+}
+.eye-icon {
+  background-color: #167f92;
+  border-color: #167f92;
+  transition: 0.3s;
+  &:hover {
+    box-shadow: 0px 0px 10px 0px #167f92;
+    transform: scale(1.05);
+  }
+}
+
+.p-datatable-tbody {
+  .p-row-even {
+    background: #eaf3f3;
+  }
+  .p-row-even,
+  .p-row-odd {
+    td {
+      border-right: 1.5px solid #959a98;
+      text-align: center;
+
+      &:last-child {
+        border: 0;
+      }
+    }
+  }
+}
+
+.p-datatable .p-column-header-content {
+  justify-content: center;
+}
+
+.p-datatable .p-datatable-tbody > tr > td {
+  padding: 5px;
+}
+
+.p-column-title {
+  color: white;
+}
+
+.p-column-header-content {
+  svg {
+    color: white;
+  }
+}
+
+.p-datatable .p-sortable-column.p-highlight .p-sortable-column-icon,
+.p-sortable-column.p-highlight .p-column-title {
+  color: #161616;
+}
+
+.p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+  background: #4285f438;
+  border-color: #4285f4;
+  color: #4285f4;
+}
+
+.p-datatable .p-datatable-tbody > tr:focus-visible {
+  outline: 0.15rem solid #4286f4bb;
+  outline-offset: -0.15rem;
+}
+
+.p-link:focus-visible {
+  outline: 1px solid #4286f4bb;
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+.p-button {
+  border-radius: 20px !important;
+}
+
+.scroll {
+  max-height: 70vh;
+  overflow-y: overlay;
+
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: #f1f1f1;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 5px;
+  }
+}
+
+.p-datatable .p-sortable-column:not(.p-highlight):hover {
+  background: transparent;
+  color: #1e293b;
+}
+
+.parent-loader {
+  width: 100%;
+  height: 100vh;
+  position: fixed;
+  top: 50%;
+  right: 0;
+  transform: translate(0, -50%);
+  background-color: #1616163b;
+  z-index: 990;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .custom-loader {
+    position: absolute;
+    z-index: 999;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: radial-gradient(farthest-side, #167f92 94%, #0000) top/16px 16px
+        no-repeat,
+      conic-gradient(#0000 30%, #167f92);
+    -webkit-mask: radial-gradient(
+      farthest-side,
+      #0000 calc(100% - 16px),
+      #000 0
+    );
+    animation: s3 1s infinite linear;
+  }
+}
+
+@keyframes s3 {
+  100% {
+    transform: rotate(1turn);
+  }
+}
+
 @keyframes bounce {
   25% {
     transform: translatey(5px);
   }
   75% {
     transform: translatey(-5px);
-  }
-}
-
-.page-link {
-  box-shadow: none;
-}
-.pagination-container {
-  display: flex;
-  column-gap: 10px;
-}
-
-.next-button,
-.back-button {
-  font-size: 20px;
-}
-
-.paginate-buttons {
-  height: 40px;
-  width: 40px;
-  border-radius: 20px;
-  cursor: pointer;
-  background-color: rgb(242, 242, 242);
-  border: 1px solid rgb(217, 217, 217);
-  color: black;
-}
-.paginate-buttons:hover {
-  background-color: #d8d8d8;
-}
-.active-page {
-  background-color: #3498db;
-  border: 1px solid #3498db;
-  color: white;
-  font-weight: bold;
-}
-.active-page:hover {
-  background-color: #2988c8;
-}
-
-@media (max-width: 567px) {
-  .header-title {
-    font-size: 25px;
-    display: flex;
-    align-items: center;
-  }
-  .select {
-    height: 60px;
-  }
-
-  .responstable {
-    tr {
-      td {
-        margin: auto;
-
-        a {
-          font-size: 15px;
-        }
-      }
-    }
   }
 }
 </style>

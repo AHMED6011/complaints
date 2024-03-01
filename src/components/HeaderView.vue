@@ -3,7 +3,7 @@
     <nav class="navbar navbar-expand-lg bg-dark">
       <div class="container">
         <RouterLink class="navbar-brand pe-5" to="/complaints">
-          <i class="fa-solid fa-phone fa-2xl text-primary"></i>
+          <i class="fa-solid fa-phone fa-2xl"></i>
         </RouterLink>
         <button
           class="navbar-toggler text-light"
@@ -119,13 +119,17 @@ export default {
 <style lang="scss" scoped>
 .navbar {
   padding: 15px 15px;
+
+  .navbar-brand {
+    color: #167f92;
+  }
   .navbar-nav {
     & .nav-item {
       a {
         color: white;
         transition: 0.1s;
         &.router-link-exact-active {
-          color: #0d6efd;
+          color: #167f92;
           font-weight: bold;
         }
       }

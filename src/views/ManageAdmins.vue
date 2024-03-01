@@ -1,5 +1,8 @@
 <template>
   <main>
+    <div class="parent-loader" v-if="loading">
+      <div class="custom-loader"></div>
+    </div>
     <div class="container-fluid">
       <div class="row justify-content-center align-items-center">
         <div class="col-12 pt-3 pt-md-0 col-md-3 justify-content-end">
@@ -15,7 +18,7 @@
           </div>
         </div>
         <div class="col-6 col-md-4 offset-0 offset-md-1">
-          <h1 class="header-title text-primary text-center fw-bold py-4">
+          <h1 class="header-title custom-text-primary text-center fw-bold py-4">
             Yöneticileri Sayfasi
           </h1>
         </div>
@@ -27,275 +30,249 @@
 
     <h4 class="text-center text-danger">{{ emptyArray }}</h4>
 
-    <div
-      class="container spinner-container"
-      v-if="admins.length == 0 && spinner"
-    >
-      <div class="row justify-content-center align-items-center">
-        <div class="col-12 text-center">
-          <svg
-            class="spinner"
-            width="65px"
-            height="65px"
-            viewBox="0 0 66 66"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <circle
-              class="path"
-              fill="none"
-              stroke-width="6"
-              stroke-linecap="round"
-              cx="33"
-              cy="33"
-              r="30"
-            ></circle>
-          </svg>
-        </div>
+    <div class="container spinner-container" v-if="spinner">
+      <div class="parent-loader">
+        <div class="custom-loader"></div>
       </div>
     </div>
 
-    <div class="scroll" v-else>
-      <table class="responstable">
-        <tr>
-          <th>Kullanıcı adı</th>
-          <th class="d-none d-md-table-cell">e-posta</th>
-          <th class="d-none d-sm-table-cell">Kategori</th>
-          <th class="d-none d-md-table-cell">Telefon numarası</th>
-          <th class="d-table-cell">Süreci kaydet</th>
-        </tr>
+    <table class="responstable">
+      <tr>
+        <th>Kullanıcı adı</th>
+        <th class="d-none d-md-table-cell">e-posta</th>
+        <th class="d-none d-sm-table-cell">Kategori</th>
+        <th class="d-none d-md-table-cell">Telefon numarası</th>
+        <th class="d-table-cell">Süreci kaydet</th>
+      </tr>
 
-        <tr v-for="(admin, index) in displayedAdmins" :key="index">
-          <td>
-            <p v-if="admin.name">{{ admin.name }}</p>
-            <p v-else>Veri yok</p>
-          </td>
-          <td class="text-break d-none d-md-table-cell">
-            <p v-if="admin.email">{{ admin.email }}</p>
-            <p v-else>Veri yok</p>
-          </td>
-          <td class="text-break d-none d-sm-table-cell">
-            <p v-if="admin.category">{{ admin.category }}</p>
-            <p v-else>Veri yok</p>
-          </td>
-          <td class="text-break d-none d-md-table-cell">
-            <p v-if="admin.phoneNumber">{{ admin.phoneNumber }}</p>
-            <p v-else>Veri yok</p>
-          </td>
+      <tr v-for="(admin, index) in admins" :key="index">
+        <td>
+          <p v-if="admin.name">{{ admin.name }}</p>
+          <p v-else>Veri yok</p>
+        </td>
+        <td class="text-break d-none d-md-table-cell">
+          <p v-if="admin.email">{{ admin.email }}</p>
+          <p v-else>Veri yok</p>
+        </td>
+        <td class="text-break d-none d-sm-table-cell">
+          <p v-if="admin.category">{{ admin.category }}</p>
+          <p v-else>Veri yok</p>
+        </td>
+        <td class="text-break d-none d-md-table-cell">
+          <p v-if="admin.phoneNumber">{{ admin.phoneNumber }}</p>
+          <p v-else>Veri yok</p>
+        </td>
 
-          <td>
-            <div
-              class="d-flex ms-3 ms-sm-0 justify-content-lg-center justify-content-start"
+        <td>
+          <div
+            class="d-flex ms-3 ms-sm-0 justify-content-lg-center justify-content-start"
+          >
+            <button
+              type="button"
+              class="btn custom-bg-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#staticBackdrop"
+              @click="getAdminData(admin)"
             >
-              <button
-                type="button"
-                class="btn btn-primary"
-                data-bs-toggle="modal"
-                data-bs-target="#staticBackdrop"
-                @click="getAdminData(admin)"
-              >
-                Düzenleme
-              </button>
-              <button
-                class="btn mx-2 btn-danger"
-                @click="deleteAcount(admin.id, this.API, this.isAllow)"
-              >
-                Sil
-              </button>
-              <div
-                class="modal fade"
-                id="staticBackdrop"
-                data-bs-backdrop="static"
-                data-bs-keyboard="false"
-                tabindex="-1"
-                aria-labelledby="staticBackdropLabel"
-                aria-hidden="true"
-              >
-                <div class="modal-dialog" style="max-width: 700px !important">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h1 class="modal-title fs-5" id="exampleModalLabel">
-                        Veriler güncelleniyor
-                      </h1>
-                      <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"
-                        @click.prevent="cancelButton()"
-                      ></button>
-                    </div>
-                    <div class="modal-body">
-                      <form>
-                        <div class="row mb-3">
-                          <input
-                            type="text"
-                            v-model="selectedAdmin.name"
-                            placeholder="Kullanıcı adı"
-                            autocomplete="new-password"
-                            class="form-control"
-                          />
-                        </div>
-                        <div class="row mb-3">
-                          <input
-                            type="email"
-                            v-model="selectedAdmin.email"
-                            autocomplete="new-password"
-                            placeholder="e-posta"
-                            class="form-control"
-                          />
-                        </div>
-                        <div class="row mb-3">
-                          <input
-                            type="text"
-                            autocomplete="new-password"
-                            v-model="selectedAdmin.phoneNumber"
-                            :placeholder="selectedAdmin.phoneNumber"
-                            class="form-control"
-                          />
-                        </div>
-                        <div
-                          class="row mb-3"
-                          :style="{ display: checkAdminID(selectedAdmin.id) }"
+              Düzenleme
+            </button>
+            <button
+              class="btn mx-2 btn-danger"
+              @click="deleteAcount(admin.id, this.API, this.isAllow)"
+            >
+              Sil
+            </button>
+            <div
+              class="modal fade"
+              id="staticBackdrop"
+              data-bs-backdrop="static"
+              data-bs-keyboard="false"
+              tabindex="-1"
+              aria-labelledby="staticBackdropLabel"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog" style="max-width: 700px !important">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">
+                      Veriler güncelleniyor
+                    </h1>
+                    <button
+                      type="button"
+                      class="btn-close"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                      @click.prevent="cancelButton()"
+                    ></button>
+                  </div>
+                  <div class="modal-body">
+                    <form>
+                      <div class="row mb-3">
+                        <input
+                          type="text"
+                          v-model="selectedAdmin.name"
+                          placeholder="Kullanıcı adı"
+                          autocomplete="new-password"
+                          class="form-control"
+                        />
+                      </div>
+                      <div class="row mb-3">
+                        <input
+                          type="email"
+                          v-model="selectedAdmin.email"
+                          autocomplete="new-password"
+                          placeholder="e-posta"
+                          class="form-control"
+                        />
+                      </div>
+                      <div class="row mb-3">
+                        <input
+                          type="text"
+                          autocomplete="new-password"
+                          v-model="selectedAdmin.phoneNumber"
+                          :placeholder="selectedAdmin.phoneNumber"
+                          class="form-control"
+                        />
+                      </div>
+                      <div
+                        class="row mb-3"
+                        :style="{ display: checkAdminID(selectedAdmin.id) }"
+                      >
+                        <select
+                          id="validationCustom0"
+                          class="form-select mb-3"
+                          aria-label="Default select example"
+                          v-model="selectedAdmin.category"
+                          title="Kategori seç"
                         >
-                          <select
-                            id="validationCustom0"
-                            class="form-select mb-3"
-                            aria-label="Default select example"
-                            v-model="selectedAdmin.category"
-                            title="Kategori seç"
+                          <option value="" disabled selected>
+                            Kategori seç
+                          </option>
+                          <option value="Tüm">Tüm</option>
+                          <option value="Yol ve çevre düzeni">
+                            Yol ve çevre düzeni
+                          </option>
+                          <option value="Kaski">Kaski</option>
+                          <option value="Armadaş">Armadaş</option>
+                          <option value="Akedaş">Akedaş</option>
+                          <option value="Sokak hayvanı">Sokak hayvanı</option>
+                          <option value="Çöp birikmesi">Çöp birikmesi</option>
+                          <option value="Ulaşım ihbarı">Ulaşım ihbarı</option>
+                          <option value="Zabıta">Zabıta</option>
+                          <option value="Diğer">Diğer</option>
+                        </select>
+                      </div>
+                      <div
+                        class="row mb-3 justify-content-center"
+                        :style="{ display: checkAdminID(selectedAdmin.id) }"
+                      >
+                        <h3 class="mb-4">İzin ver</h3>
+                        <div class="col-3 col-md-2 mx-2 p-0">
+                          <input
+                            type="checkbox"
+                            class="btn-check"
+                            :id="`1${selectedAdmin.id}1`"
+                            autocomplete="new-password"
+                            v-model="selectedAdmin.canReject"
+                          />
+                          <label
+                            class="btn custom-bg-primary"
+                            :for="`1${selectedAdmin.id}1`"
+                            >Reddedildi
+                          </label>
+                        </div>
+                        <div class="col-3 col-md-2 mx-2 p-0">
+                          <input
+                            type="checkbox"
+                            class="btn-check"
+                            :id="`2${selectedAdmin.id}2`"
+                            autocomplete="new-password"
+                            v-model="selectedAdmin.canAccept"
+                          />
+                          <label
+                            class="btn custom-bg-primary"
+                            :for="`2${selectedAdmin.id}2`"
+                            >Kabul edildi</label
                           >
-                            <option value="" disabled selected>
-                              Kategori seç
-                            </option>
-                            <option value="Tüm">Tüm</option>
-                            <option value="Yol ve çevre düzeni">
-                              Yol ve çevre düzeni
-                            </option>
-                            <option value="Kaski">Kaski</option>
-                            <option value="Armadaş">Armadaş</option>
-                            <option value="Akedaş">Akedaş</option>
-                            <option value="Sokak hayvanı">Sokak hayvanı</option>
-                            <option value="Çöp birikmesi">Çöp birikmesi</option>
-                            <option value="Ulaşım ihbarı">Ulaşım ihbarı</option>
-                            <option value="Zabıta">Zabıta</option>
-                            <option value="Diğer">Diğer</option>
-                          </select>
                         </div>
-                        <div
-                          class="row mb-3 justify-content-center"
-                          :style="{ display: checkAdminID(selectedAdmin.id) }"
-                        >
-                          <h3 class="mb-4">İzin ver</h3>
-                          <div class="col-3 col-md-2 mx-2 p-0">
-                            <input
-                              type="checkbox"
-                              class="btn-check"
-                              :id="`1${selectedAdmin.id}1`"
-                              autocomplete="new-password"
-                              v-model="selectedAdmin.canReject"
-                            />
-                            <label
-                              class="btn btn-outline-primary"
-                              :for="`1${selectedAdmin.id}1`"
-                              >Reddedildi
-                            </label>
-                          </div>
-                          <div class="col-3 col-md-2 mx-2 p-0">
-                            <input
-                              type="checkbox"
-                              class="btn-check"
-                              :id="`2${selectedAdmin.id}2`"
-                              autocomplete="new-password"
-                              v-model="selectedAdmin.canAccept"
-                            />
-                            <label
-                              class="btn btn-outline-primary"
-                              :for="`2${selectedAdmin.id}2`"
-                              >Kabul edildi</label
-                            >
-                          </div>
-                          <div class="col-3 col-md-2 mx-2 p-0">
-                            <input
-                              type="checkbox"
-                              class="btn-check"
-                              :id="`3${selectedAdmin.id}3`"
-                              autocomplete="new-password"
-                              v-model="selectedAdmin.canInProgress"
-                            />
-                            <label
-                              class="btn btn-outline-primary"
-                              :for="`3${selectedAdmin.id}3`"
-                              >Devam ediyor</label
-                            >
-                          </div>
-                          <div class="col-3 col-md-2 mx-2 p-0">
-                            <input
-                              type="checkbox"
-                              class="btn-check"
-                              :id="`4${selectedAdmin.id}4`"
-                              autocomplete="new-password"
-                              v-model="selectedAdmin.canClose"
-                            />
-                            <label
-                              class="btn btn-outline-primary"
-                              :for="`4${selectedAdmin.id}4`"
-                              >Tamamlandı</label
-                            >
-                          </div>
-                          <div class="col-3 col-md-2 mx-2 p-0">
-                            <input
-                              type="checkbox"
-                              class="btn-check"
-                              :id="`5${selectedAdmin.id}5`"
-                              autocomplete="new-password"
-                              v-model="selectedAdmin.manageAdmins"
-                            />
-                            <label
-                              class="btn btn-outline-primary"
-                              :for="`5${selectedAdmin.id}5`"
-                              >Yönetici</label
-                            >
-                          </div>
+                        <div class="col-3 col-md-2 mx-2 p-0">
+                          <input
+                            type="checkbox"
+                            class="btn-check"
+                            :id="`3${selectedAdmin.id}3`"
+                            autocomplete="new-password"
+                            v-model="selectedAdmin.canInProgress"
+                          />
+                          <label
+                            class="btn custom-bg-primary"
+                            :for="`3${selectedAdmin.id}3`"
+                            >Devam ediyor</label
+                          >
                         </div>
-                      </form>
-                    </div>
-                    <div class="modal-footer">
-                      <button
-                        type="button"
-                        class="btn btn-secondary"
-                        data-bs-dismiss="modal"
-                        @click.prevent="cancelButton()"
-                      >
-                        İptal et
-                      </button>
-                      <button
-                        type="button"
-                        class="btn btn-primary"
-                        @click="updateData()"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"
-                      >
-                        Güncelle
-                      </button>
-                    </div>
+                        <div class="col-3 col-md-2 mx-2 p-0">
+                          <input
+                            type="checkbox"
+                            class="btn-check"
+                            :id="`4${selectedAdmin.id}4`"
+                            autocomplete="new-password"
+                            v-model="selectedAdmin.canClose"
+                          />
+                          <label
+                            class="btn custom-bg-primary"
+                            :for="`4${selectedAdmin.id}4`"
+                            >Tamamlandı</label
+                          >
+                        </div>
+                        <div class="col-3 col-md-2 mx-2 p-0">
+                          <input
+                            type="checkbox"
+                            class="btn-check"
+                            :id="`5${selectedAdmin.id}5`"
+                            autocomplete="new-password"
+                            v-model="selectedAdmin.manageAdmins"
+                          />
+                          <label
+                            class="btn custom-bg-primary"
+                            :for="`5${selectedAdmin.id}5`"
+                            >Yönetici</label
+                          >
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-secondary"
+                      data-bs-dismiss="modal"
+                      @click.prevent="cancelButton()"
+                    >
+                      İptal et
+                    </button>
+                    <button
+                      type="button"
+                      class="btn custom-bg-primary"
+                      @click="updateData()"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      Güncelle
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
-          </td>
-        </tr>
-      </table>
-    </div>
+          </div>
+        </td>
+      </tr>
+    </table>
 
     <div class="pagination pt-3 d-flex justify-content-center">
-      <vue-awesome-paginate
-        v-model="currentPage"
-        :total-items="totalAdmins"
-        :items-per-page="itemsPerPage"
-        :max-pages-shown="5"
-        @page-clicked="handlePageChange"
-        :container-class="'pagination-container'"
-      />
+      <Paginator
+        @page="onPage($event)"
+        :rows="itemsPerPage"
+        :totalRecords="totalAdmins"
+      ></Paginator>
     </div>
   </main>
 </template>
@@ -314,11 +291,11 @@ export default {
       selectedAdmin: {},
       category: "",
       name: "",
-      currentPage: 1,
       itemsPerPage: 5,
       totalAdmins: 0,
       email: "",
       phoneNumber: "",
+      loading: true,
       searchedValue: "",
       cookies: useCookies().cookies,
       userID: "",
@@ -342,63 +319,73 @@ export default {
         await this.filterAdmins();
       }, 500);
     },
-    async getAdmins() {
-      try {
-        const response = await axios.get(`${this.API}/api/Users`, {
-          headers: {
-            Authorization: `Bearer ${this.isAllow}`,
-            "Content-Type": "application/json",
-          },
-        });
+    getAdmins(param = "") {
+      setTimeout(async () => {
+        try {
+          const response = await axios.get(
+            `${this.API}/api/Users/Paging?search=${param}&skip=1&take=${this.itemsPerPage}`,
+            {
+              headers: {
+                Authorization: `Bearer ${this.isAllow}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
 
-        this.admins = response.data;
-        this.totalAdmins = response.data.length;
-        this.pagesShown = Math.ceil(this.totalAdmins / this.itemsPerPage);
-      } catch (error) {
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: `${error.response}`,
-        });
-      }
-    },
+          this.admins = response.data.items;
+          this.totalAdmins = response.data.total;
 
-    async filterAdmins() {
-      this.currentPage = 1;
-      try {
-        const result = await axios.get(
-          `${this.API}/api/Users/Paging?search=${this.searchedValue}`,
-          {
-            headers: {
-              Authorization: `Bearer ${this.isAllow}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (!result.data.items.length == 0) {
-          this.admins = result.data.items;
-          this.emptyArray = "";
-        } else if (result.data.total === 0) {
           this.spinner = false;
-          return (this.emptyArray = `Yönetici bulunamadı '${this.searchedValue}' !!`);
+          this.loading = false;
+
+          this.admins = response.data.items;
+          this.totalAdmins = response.data.total;
+          if (!response.data.total == 0) {
+            this.emptyArray = "";
+          } else if (response.data.total === 0 && this.searchedValue !== "") {
+            return (this.emptyArray = `Yönetici bulunamadı '${this.searchedValue}' !!`);
+          }
+        } catch (error) {
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `${error.message}`,
+          });
         }
-
-        this.spinner = true;
-
-        this.totalAdmins = result.data.total;
-        this.pagesShown = Math.ceil(this.totalAdmins / this.itemsPerPage);
-      } catch (error) {
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: `${error.result}`,
-        });
-      }
+      }, Math.random() * 100 + 150);
     },
 
-    handlePageChange(data) {
-      this.currentPage = data.currentPage;
+    filterAdmins() {
+      this.spinner = true;
+      this.getAdmins(this.searchedValue);
+    },
+
+    onPage(event) {
+      this.spinner = true;
+      setTimeout(async () => {
+        try {
+          const response = await axios.get(
+            `${this.API}/api/Users/Paging?skip=${event.page + 1}&take=${
+              this.itemsPerPage
+            }&search=${this.searchedValue}`,
+            {
+              headers: {
+                Authorization: `Bearer ${this.isAllow}`,
+              },
+            }
+          );
+          this.spinner = false;
+
+          this.admins = response.data.items;
+          this.totalAdmins = response.data.total;
+        } catch (error) {
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: `${error.message}`,
+          });
+        }
+      }, Math.random() * 200 + 150);
     },
 
     getStatus(index) {
@@ -445,7 +432,7 @@ export default {
           },
           async function (isConfirm) {
             if (isConfirm) {
-              const response = await axios.delete(`${API}/api/Users/${id}`, {
+              await axios.delete(`${API}/api/Users/${id}`, {
                 headers: {
                   Authorization: `Bearer ${token}`,
                   "Content-Type": "application/json",
@@ -471,7 +458,7 @@ export default {
         Swal.fire({
           icon: "error",
           title: "Oops...",
-          text: `${error.response.data}`,
+          text: `${error.message.data}`,
         });
       }
     },
@@ -499,29 +486,20 @@ export default {
         Swal.fire({
           icon: "error",
           title: "Oops...",
-          text: `${error.response.data}`,
+          text: `${error.message.data}`,
         });
       }
     },
   },
 
-  computed: {
-    displayedAdmins() {
-      const startIndex =
-        this.currentPage * this.itemsPerPage - this.itemsPerPage;
-      const endIndex = startIndex + this.itemsPerPage;
-      return this.admins.slice(startIndex, endIndex);
-    },
-  },
-
   mounted() {
-    this.getAdmins();
+    this.filterAdmins();
     this.userID = this.cookies.get("userID");
   },
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 $table-breakpoint: 480px;
 $table-background-color: #fff;
 $table-text-color: #024457;
@@ -623,22 +601,6 @@ $table-header-border: 1px solid #fff;
   }
 }
 
-.scroll {
-  max-height: 400px;
-  overflow-y: overlay;
-
-  &::-webkit-scrollbar {
-    width: 10px;
-  }
-  &::-webkit-scrollbar-track {
-    background-color: #f1f1f1;
-  }
-  &::-webkit-scrollbar-thumb {
-    background-color: #888;
-    border-radius: 5px;
-  }
-}
-
 @include responstable(
   $border-radius: $table-border-radius,
   $highlight-color: $table-highlight-color,
@@ -649,28 +611,6 @@ $table-header-border: 1px solid #fff;
 
 $offset: 187;
 $duration: 1.4s;
-
-.spinner-container {
-  padding-top: 100px;
-}
-
-.spinner {
-  animation: rotator $duration linear infinite;
-}
-
-@keyframes rotator {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(270deg);
-  }
-}
-
-.pagination-container {
-  display: flex;
-  column-gap: 10px;
-}
 
 .next-button,
 .back-button {
@@ -705,6 +645,60 @@ $duration: 1.4s;
   transform-origin: center;
   animation: dash $duration ease-in-out infinite,
     colors ($duration * 4) ease-in-out infinite;
+}
+
+.parent-loader {
+  width: 100%;
+  height: 100vh;
+  position: fixed;
+  top: 50%;
+  right: 0;
+  transform: translate(0, -50%);
+  background-color: #1616163b;
+  z-index: 990;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .custom-loader {
+    position: absolute;
+    z-index: 999;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: radial-gradient(farthest-side, #167f92 94%, #0000) top/16px 16px
+        no-repeat,
+      conic-gradient(#0000 30%, #167f92);
+    -webkit-mask: radial-gradient(
+      farthest-side,
+      #0000 calc(100% - 16px),
+      #000 0
+    );
+    animation: s3 1s infinite linear;
+  }
+}
+
+.p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+  background: #4285f438;
+  border-color: #4285f4;
+  color: #4285f4;
+}
+
+.p-datatable .p-datatable-tbody > tr:focus-visible {
+  outline: 0.15rem solid #4286f4bb;
+  outline-offset: -0.15rem;
+}
+
+.p-link:focus-visible {
+  outline: 1px solid #4286f4bb;
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+@keyframes s3 {
+  100% {
+    transform: rotate(1turn);
+  }
 }
 
 @keyframes colors {
