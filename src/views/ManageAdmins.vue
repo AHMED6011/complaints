@@ -137,7 +137,7 @@
                           type="text"
                           autocomplete="new-password"
                           v-model="phoneNumber"
-                          :placeholder="phoneNumber"
+                          placeholder="Telefon numarası"
                           class="form-control"
                         />
                       </div>
