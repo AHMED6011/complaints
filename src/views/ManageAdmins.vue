@@ -435,10 +435,6 @@ export default {
       }
     },
 
-    myAcition() {
-      console.log("function is fired");
-    },
-
     getAdminData(adminData) {
       this.selectedAdmin = adminData;
       this.id = adminData.id;
@@ -534,7 +530,6 @@ export default {
       this.updatedData.canClose = this.canClose;
       this.updatedData.canInProgress = this.canInProgress;
       this.updatedData.manageAdmins = this.manageAdmins;
-      console.log(this.updatedData);
       try {
         await axios.put(`${this.API}/api/Users/${this.id}`, this.updatedData, {
           headers: {
