@@ -180,6 +180,7 @@
               class="list-group-item text-secondary text-break d-flex justify-content-around border-0 text-start"
             >
               <span class="p-1"> {{ log.logText }} </span>
+              <span class="p-1 d-none"> {{ formatDate(log.logDate) }} </span>
               <span class="p-1"> {{ formatDate(log.logDate) }} </span>
             </li>
           </ul>
@@ -190,7 +191,6 @@
         data-bs-toggle="offcanvas"
         data-bs-target="#offcanvasExample"
         aria-controls="offcanvasExample"
-        @click="openChatBox"
       >
         <i class="fa-regular fa-comment-dots fa-2xl"></i>
       </button>
@@ -210,7 +210,11 @@
           ></button>
         </div>
         <div class="offcanvas-body ps-0">
-          <SendMessages :complaint="complaint" />
+          <SendMessages
+            :complaint="complaint"
+            :id="complaint.id"
+            opend="opend"
+          />
         </div>
       </div>
     </div>
@@ -220,6 +224,7 @@
 <script>
 import axios from "axios";
 import SendMessages from "@/components/SendMessages.vue";
+import { useDateFormat } from "@vueuse/core";
 import { useCookies } from "vue3-cookies";
 
 export default {
@@ -282,31 +287,23 @@ export default {
       }
     },
     async accepted() {
-      const result = await axios.post(
-        `${this.API}/api/Complaints/Accept/${this.id}`,
-        null,
-        {
-          headers: {
-            Authorization: `Bearer ${this.isAllow}`,
-          },
-        }
-      );
+      await axios.post(`${this.API}/api/Complaints/Accept/${this.id}`, null, {
+        headers: {
+          Authorization: `Bearer ${this.isAllow}`,
+        },
+      });
       location.reload();
     },
     async rejected() {
-      const result = await axios.post(
-        `${this.API}/api/Complaints/Reject/${this.id}`,
-        null,
-        {
-          headers: {
-            Authorization: `Bearer ${this.isAllow}`,
-          },
-        }
-      );
+      await axios.post(`${this.API}/api/Complaints/Reject/${this.id}`, null, {
+        headers: {
+          Authorization: `Bearer ${this.isAllow}`,
+        },
+      });
       location.reload();
     },
     async inProgress() {
-      const result = await axios.post(
+      await axios.post(
         `${this.API}/api/Complaints/InProgress/${this.id}`,
         null,
         {
@@ -318,15 +315,11 @@ export default {
       location.reload();
     },
     async closed() {
-      const result = await axios.post(
-        `${this.API}/api/Complaints/Close/${this.id}`,
-        null,
-        {
-          headers: {
-            Authorization: `Bearer ${this.isAllow}`,
-          },
-        }
-      );
+      await axios.post(`${this.API}/api/Complaints/Close/${this.id}`, null, {
+        headers: {
+          Authorization: `Bearer ${this.isAllow}`,
+        },
+      });
       location.reload();
     },
     getStatusMessage(status) {
@@ -356,15 +349,10 @@ export default {
       }
     },
     formatDate(dateString) {
-      const date = new Date(dateString);
-
-      const year = date.getFullYear();
-      const month = (date.getMonth() + 1).toString().padStart(2, "0");
-      const day = date.getDate().toString().padStart(2, "0");
-      const hours = (date.getHours() + 3).toString().padStart(2, "0");
-      const minutes = date.getMinutes().toString().padStart(2, "0");
-
-      return `${year}/${month}/${day} ${hours}:${minutes}`;
+      return useDateFormat(dateString, "YYYY-MM-DD HH:mm").value.replace(
+        /["']/g,
+        ""
+      );
     },
 
     IsStaff() {

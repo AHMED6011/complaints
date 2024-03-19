@@ -1,7 +1,11 @@
 <template>
   <div class="card h-100">
-    <div class="card-body chat-care">
-      <ul class="chat" id="chat" ref="chatBox" v-if="complaint">
+    <div
+      class="card-body chat-care"
+      ref="scrollContainer"
+      style="overflow-y: scroll; height: 100%"
+    >
+      <ul class="chat" v-if="complaint">
         <li
           :class="getClass(message.userId)"
           v-for="message in complaint.messages"
@@ -77,6 +81,9 @@ export default {
         }
       );
       this.complaint.messages.push(response.data);
+      setTimeout(() => {
+        this.scrollToBottom();
+      }, 50);
       this.msg = "";
     },
 
@@ -96,6 +103,13 @@ export default {
         ? "agent clearfix"
         : "admin clearfix";
     },
+    scrollToBottom() {
+      const scrollContainer = this.$refs.scrollContainer;
+      scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    },
+  },
+  mounted() {
+    this.scrollToBottom();
   },
 };
 </script>

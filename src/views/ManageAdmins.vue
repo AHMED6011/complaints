@@ -23,7 +23,15 @@
           </h1>
         </div>
         <div class="col-6 col-md-4 text-end">
-          <CreateAdmins />
+          <button
+            type="button"
+            class="btn custom-bg-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#staticBackdrop"
+            @click="noUser()"
+          >
+            Yeni Yönetici Ekle
+          </button>
         </div>
       </div>
     </div>
@@ -69,18 +77,18 @@
           >
             <button
               type="button"
-              class="btn custom-bg-primary"
+              class="btn"
               data-bs-toggle="modal"
               data-bs-target="#staticBackdrop"
               @click="getAdminData(admin)"
             >
-              Düzenleme
+              <i class="fa-solid fa-pen-to-square fa-xl"></i>
             </button>
             <button
-              class="btn mx-2 btn-danger"
+              class="btn mx-2 text-danger"
               @click="deleteAcount(admin.id, this.API, this.isAllow)"
             >
-              Sil
+              <i class="fa-solid fa-trash-can fa-xl"></i>
             </button>
             <div
               class="modal fade"
@@ -102,7 +110,6 @@
                       class="btn-close"
                       data-bs-dismiss="modal"
                       aria-label="Close"
-                      @click.prevent="cancelButton()"
                     ></button>
                   </div>
                   <div class="modal-body">
@@ -110,7 +117,7 @@
                       <div class="row mb-3">
                         <input
                           type="text"
-                          v-model="selectedAdmin.name"
+                          v-model="name"
                           placeholder="Kullanıcı adı"
                           autocomplete="new-password"
                           class="form-control"
@@ -119,7 +126,7 @@
                       <div class="row mb-3">
                         <input
                           type="email"
-                          v-model="selectedAdmin.email"
+                          v-model="email"
                           autocomplete="new-password"
                           placeholder="e-posta"
                           class="form-control"
@@ -129,9 +136,21 @@
                         <input
                           type="text"
                           autocomplete="new-password"
-                          v-model="selectedAdmin.phoneNumber"
-                          :placeholder="selectedAdmin.phoneNumber"
+                          v-model="phoneNumber"
+                          :placeholder="phoneNumber"
                           class="form-control"
+                        />
+                      </div>
+                      <div class="mb-3 row" v-if="!id">
+                        <input
+                          type="password"
+                          autocomplete="off"
+                          @focus="removeReadonlyPass()"
+                          readonly
+                          v-model="password"
+                          placeholder="Şifre"
+                          class="form-control"
+                          required
                         />
                       </div>
                       <div
@@ -142,7 +161,7 @@
                           id="validationCustom0"
                           class="form-select mb-3"
                           aria-label="Default select example"
-                          v-model="selectedAdmin.category"
+                          v-model="category"
                           title="Kategori seç"
                         >
                           <option value="" disabled selected>
@@ -173,10 +192,13 @@
                             class="btn-check"
                             :id="`1${selectedAdmin.id}1`"
                             autocomplete="new-password"
-                            v-model="selectedAdmin.canReject"
+                            @click="canReject != canReject"
+                            v-model="canReject"
                           />
                           <label
-                            class="btn custom-bg-primary"
+                            :class="[
+                              canReject ? 'btn custom-bg-primary' : 'btn',
+                            ]"
                             :for="`1${selectedAdmin.id}1`"
                             >Reddedildi
                           </label>
@@ -187,10 +209,13 @@
                             class="btn-check"
                             :id="`2${selectedAdmin.id}2`"
                             autocomplete="new-password"
-                            v-model="selectedAdmin.canAccept"
+                            @click="canAccept != canAccept"
+                            v-model="canAccept"
                           />
                           <label
-                            class="btn custom-bg-primary"
+                            :class="[
+                              canAccept ? 'btn custom-bg-primary' : 'btn',
+                            ]"
                             :for="`2${selectedAdmin.id}2`"
                             >Kabul edildi</label
                           >
@@ -201,10 +226,13 @@
                             class="btn-check"
                             :id="`3${selectedAdmin.id}3`"
                             autocomplete="new-password"
-                            v-model="selectedAdmin.canInProgress"
+                            @click="canInProgress != canInProgress"
+                            v-model="canInProgress"
                           />
                           <label
-                            class="btn custom-bg-primary"
+                            :class="[
+                              canInProgress ? 'btn custom-bg-primary' : 'btn',
+                            ]"
                             :for="`3${selectedAdmin.id}3`"
                             >Devam ediyor</label
                           >
@@ -215,10 +243,13 @@
                             class="btn-check"
                             :id="`4${selectedAdmin.id}4`"
                             autocomplete="new-password"
-                            v-model="selectedAdmin.canClose"
+                            @click="canClose != canClose"
+                            v-model="canClose"
                           />
                           <label
-                            class="btn custom-bg-primary"
+                            :class="[
+                              canClose ? 'btn custom-bg-primary' : 'btn',
+                            ]"
                             :for="`4${selectedAdmin.id}4`"
                             >Tamamlandı</label
                           >
@@ -229,10 +260,13 @@
                             class="btn-check"
                             :id="`5${selectedAdmin.id}5`"
                             autocomplete="new-password"
-                            v-model="selectedAdmin.manageAdmins"
+                            @click="manageAdmins != manageAdmins"
+                            v-model="manageAdmins"
                           />
                           <label
-                            class="btn custom-bg-primary"
+                            :class="[
+                              manageAdmins ? 'btn custom-bg-primary' : 'btn',
+                            ]"
                             :for="`5${selectedAdmin.id}5`"
                             >Yönetici</label
                           >
@@ -245,7 +279,6 @@
                       type="button"
                       class="btn btn-secondary"
                       data-bs-dismiss="modal"
-                      @click.prevent="cancelButton()"
                     >
                       İptal et
                     </button>
@@ -280,21 +313,20 @@
 <script>
 import axios from "axios";
 import { useCookies } from "vue3-cookies";
-import CreateAdmins from "@/components/CreateAdmins.vue";
 import Swal from "sweetalert2";
 
 export default {
-  components: { CreateAdmins },
   data() {
     return {
       admins: [],
       selectedAdmin: {},
-      category: "",
       name: "",
-      itemsPerPage: 5,
-      totalAdmins: 0,
+      category: "",
       email: "",
       phoneNumber: "",
+      password: "",
+      itemsPerPage: 5,
+      totalAdmins: 0,
       loading: true,
       searchedValue: "",
       cookies: useCookies().cookies,
@@ -303,13 +335,13 @@ export default {
       spinner: false,
       emptyArray: "",
       debounceTimeout: null,
-      status: [
-        { state: false, text: "Reddedildi" },
-        { state: false, text: "Kabul edildi" },
-        { state: false, text: "Devam ediyor" },
-        { state: false, text: "Tamamlandı" },
-        { state: false, text: "Yönetici Yöneticileri" },
-      ],
+      currentPage: 1,
+      canAccept: false,
+      canReject: false,
+      canClose: false,
+      canInProgress: false,
+      manageAdmins: false,
+      updatedData: {},
     };
   },
   methods: {
@@ -323,7 +355,7 @@ export default {
       setTimeout(async () => {
         try {
           const response = await axios.get(
-            `${this.API}/api/Users/Paging?search=${param}&skip=1&take=${this.itemsPerPage}`,
+            `${this.API}/api/Users/Paging?search=${param}&skip=${this.currentPage}&take=${this.itemsPerPage}`,
             {
               headers: {
                 Authorization: `Bearer ${this.isAllow}`,
@@ -386,6 +418,7 @@ export default {
           });
         }
       }, Math.random() * 200 + 150);
+      this.currentPage = event.page;
     },
 
     getStatus(index) {
@@ -402,9 +435,35 @@ export default {
       }
     },
 
+    myAcition() {
+      console.log("function is fired");
+    },
+
     getAdminData(adminData) {
       this.selectedAdmin = adminData;
       this.id = adminData.id;
+      this.name = adminData.name;
+      this.category = adminData.category;
+      this.email = adminData.email;
+      this.phoneNumber = adminData.phoneNumber;
+      this.canAccept = adminData.canAccept;
+      this.canReject = adminData.canReject;
+      this.canClose = adminData.canClose;
+      this.canInProgress = adminData.canInProgress;
+      this.manageAdmins = adminData.manageAdmins;
+    },
+
+    noUser() {
+      this.id = "";
+      this.name = "";
+      this.category = "";
+      this.email = "";
+      this.phoneNumber = "";
+      this.canAccept = "";
+      this.canReject = "";
+      this.canClose = "";
+      this.canInProgress = "";
+      this.manageAdmins = "";
     },
 
     checkAdminID(adminid) {
@@ -463,25 +522,26 @@ export default {
       }
     },
 
-    cancelButton() {
-      this.getAdmins();
-    },
-
     async updateData() {
+      this.updatedData.password = "";
+
+      this.updatedData.name = this.name;
+      this.updatedData.category = this.category;
+      this.updatedData.email = this.email;
+      this.updatedData.phoneNumber = this.phoneNumber;
+      this.updatedData.canAccept = this.canAccept;
+      this.updatedData.canReject = this.canReject;
+      this.updatedData.canClose = this.canClose;
+      this.updatedData.canInProgress = this.canInProgress;
+      this.updatedData.manageAdmins = this.manageAdmins;
+      console.log(this.updatedData);
       try {
-        this.selectedAdmin.password = "";
-
-        await axios.put(
-          `${this.API}/api/Users/${this.id}`,
-
-          this.selectedAdmin,
-          {
-            headers: {
-              Authorization: `Bearer ${this.isAllow}`,
-              "Content-type": "application/json",
-            },
-          }
-        );
+        await axios.put(`${this.API}/api/Users/${this.id}`, this.updatedData, {
+          headers: {
+            Authorization: `Bearer ${this.isAllow}`,
+            "Content-type": "application/json",
+          },
+        });
       } catch (error) {
         Swal.fire({
           icon: "error",
@@ -638,6 +698,9 @@ $duration: 1.4s;
 .active-page:hover {
   background-color: #2988c8;
 }
+.modal-body label.btn {
+  border: 1px solid #167f92 !important;
+}
 
 .path {
   stroke-dasharray: $offset;
@@ -741,6 +804,12 @@ label {
 @media (max-width: 992px) {
   .header-title {
     font-size: 25px;
+  }
+}
+
+@media (max-width: 767px) {
+  .responstable td {
+    max-width: fit-content;
   }
 }
 </style>

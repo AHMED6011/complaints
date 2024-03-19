@@ -248,7 +248,7 @@ export default {
             timer: 1100,
           });
           setTimeout(() => {
-            location.replace("/complaints");
+            // location.replace("/complaints");
           }, 1300);
         } else {
           Swal.fire({
