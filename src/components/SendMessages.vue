@@ -31,6 +31,7 @@
           class="form-control input-sm"
           placeholder="Mesajınızı buraya yazın..."
           v-model="msg"
+          autocomplete="off"
           @keydown.enter="sendMessages()"
         />
         <span class="input-group-btn">
@@ -63,12 +64,16 @@ export default {
   },
   methods: {
     async sendMessages() {
-      if (this.msg === "") {
+      let msgVal = this.msg.trim();
+      if (msgVal === "") {
         return;
       }
+
+      this.msg = "";
+
       const messages = {
         complaintId: this.complaint.id,
-        message: this.msg,
+        message: msgVal,
       };
       const response = await axios.post(
         `${this.API}/api/ComplaintMessages`,
@@ -81,10 +86,10 @@ export default {
         }
       );
       this.complaint.messages.push(response.data);
+
       setTimeout(() => {
         this.scrollToBottom();
       }, 50);
-      this.msg = "";
     },
 
     formatDate(dateString) {

@@ -148,8 +148,9 @@
                           @focus="removeReadonlyPass()"
                           readonly
                           v-model="password"
+                          value="Şifre"
                           placeholder="Şifre"
-                          class="form-control"
+                          class="form-control remove-value-password"
                           required
                         />
                       </div>
@@ -158,7 +159,6 @@
                         :style="{ display: checkAdminID(selectedAdmin.id) }"
                       >
                         <select
-                          id="validationCustom0"
                           class="form-select mb-3"
                           aria-label="Default select example"
                           v-model="category"
@@ -190,7 +190,7 @@
                           <input
                             type="checkbox"
                             class="btn-check"
-                            :id="`1${selectedAdmin.id}1`"
+                            :id="`1${admin.id}1`"
                             autocomplete="new-password"
                             @click="canReject != canReject"
                             v-model="canReject"
@@ -199,7 +199,7 @@
                             :class="[
                               canReject ? 'btn custom-bg-primary' : 'btn',
                             ]"
-                            :for="`1${selectedAdmin.id}1`"
+                            :for="`1${admin.id}1`"
                             >Reddedildi
                           </label>
                         </div>
@@ -207,7 +207,7 @@
                           <input
                             type="checkbox"
                             class="btn-check"
-                            :id="`2${selectedAdmin.id}2`"
+                            :id="`2${admin.id}2`"
                             autocomplete="new-password"
                             @click="canAccept != canAccept"
                             v-model="canAccept"
@@ -216,7 +216,7 @@
                             :class="[
                               canAccept ? 'btn custom-bg-primary' : 'btn',
                             ]"
-                            :for="`2${selectedAdmin.id}2`"
+                            :for="`2${admin.id}2`"
                             >Kabul edildi</label
                           >
                         </div>
@@ -224,7 +224,7 @@
                           <input
                             type="checkbox"
                             class="btn-check"
-                            :id="`3${selectedAdmin.id}3`"
+                            :id="`3${admin.id}3`"
                             autocomplete="new-password"
                             @click="canInProgress != canInProgress"
                             v-model="canInProgress"
@@ -233,7 +233,7 @@
                             :class="[
                               canInProgress ? 'btn custom-bg-primary' : 'btn',
                             ]"
-                            :for="`3${selectedAdmin.id}3`"
+                            :for="`3${admin.id}3`"
                             >Devam ediyor</label
                           >
                         </div>
@@ -241,7 +241,7 @@
                           <input
                             type="checkbox"
                             class="btn-check"
-                            :id="`4${selectedAdmin.id}4`"
+                            :id="`4${admin.id}4`"
                             autocomplete="new-password"
                             @click="canClose != canClose"
                             v-model="canClose"
@@ -250,7 +250,7 @@
                             :class="[
                               canClose ? 'btn custom-bg-primary' : 'btn',
                             ]"
-                            :for="`4${selectedAdmin.id}4`"
+                            :for="`4${admin.id}4`"
                             >Tamamlandı</label
                           >
                         </div>
@@ -258,7 +258,7 @@
                           <input
                             type="checkbox"
                             class="btn-check"
-                            :id="`5${selectedAdmin.id}5`"
+                            :id="`5${admin.id}5`"
                             autocomplete="new-password"
                             @click="manageAdmins != manageAdmins"
                             v-model="manageAdmins"
@@ -267,7 +267,7 @@
                             :class="[
                               manageAdmins ? 'btn custom-bg-primary' : 'btn',
                             ]"
-                            :for="`5${selectedAdmin.id}5`"
+                            :for="`5${admin.id}5`"
                             >Yönetici</label
                           >
                         </div>
@@ -286,11 +286,26 @@
                       type="button"
                       class="btn custom-bg-primary"
                       @click="updateData()"
+                      v-if="id"
                       data-bs-dismiss="modal"
                       aria-label="Close"
                     >
                       Güncelle
                     </button>
+                    <button
+                      type="button"
+                      class="btn custom-bg-primary"
+                      @click="addNewAdmin()"
+                      v-else
+                    >
+                      Ekle
+                    </button>
+                    <button
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                      id="close-modal"
+                      class="d-none"
+                    ></button>
                   </div>
                 </div>
               </div>
@@ -455,11 +470,11 @@ export default {
       this.category = "";
       this.email = "";
       this.phoneNumber = "";
-      this.canAccept = "";
-      this.canReject = "";
-      this.canClose = "";
-      this.canInProgress = "";
-      this.manageAdmins = "";
+      this.canAccept = false;
+      this.canReject = false;
+      this.canClose = false;
+      this.canInProgress = false;
+      this.manageAdmins = false;
     },
 
     checkAdminID(adminid) {
@@ -544,6 +559,95 @@ export default {
           text: `${error.message.data}`,
         });
       }
+    },
+
+    async addNewAdmin() {
+      if (
+        !this.name.trim() ||
+        !this.phoneNumber.trim() ||
+        !this.password.trim() ||
+        !this.email.trim()
+      ) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Lütfen tüm alanları doldurun",
+        });
+        return;
+      }
+
+      if (!this.email.includes("@")) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Geçerli bir e-posta adresi giriniz",
+        });
+        return;
+      }
+
+      if (!/^\d+$/.test(this.phoneNumber.trim())) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Telefon numarası yalnızca rakamlar içermelidir",
+        });
+        return;
+      }
+
+      if (
+        this.name.trim().length < 1 ||
+        this.phoneNumber.trim().length < 6 ||
+        this.password.trim().length < 6 ||
+        this.email.trim().length < 6
+      ) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Her alan en az 6 karakter içermelidir",
+        });
+        return;
+      }
+      try {
+        const createAdmin = {
+          name: this.name,
+          phoneNumber: this.phoneNumber,
+          password: this.password,
+          category: this.category,
+          canAccept: this.canAccept,
+          canReject: this.canReject,
+          canClose: this.canClose,
+          canInProgress: this.canInProgress,
+          email: this.email,
+          manageAdmins: this.manageAdmins,
+        };
+
+        await axios.post(`${this.API}/api/Users`, createAdmin, {
+          headers: {
+            Authorization: `Bearer ${this.isAllow}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        document.getElementById("close-modal").click();
+        const inputElement = document.querySelector(".remove-value-password");
+        inputElement.value = "";
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: `${error.message.data}`,
+        });
+      }
+    },
+
+    removeReadonlyPass() {
+      const inputElement = document.querySelector(".remove-value-password");
+      if (inputElement) {
+        inputElement.removeAttribute("readonly");
+      }
+      setTimeout(() => {
+        inputElement.value = "";
+      }, 50);
     },
   },
 
@@ -734,12 +838,6 @@ $duration: 1.4s;
     );
     animation: s3 1s infinite linear;
   }
-}
-
-.p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
-  background: #4285f438;
-  border-color: #4285f4;
-  color: #4285f4;
 }
 
 .p-datatable .p-datatable-tbody > tr:focus-visible {

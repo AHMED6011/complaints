@@ -426,12 +426,6 @@ select::-ms-expand {
   color: #161616;
 }
 
-.p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
-  background: #4285f438;
-  border-color: #4285f4;
-  color: #4285f4;
-}
-
 .p-datatable .p-datatable-tbody > tr:focus-visible {
   outline: 0.15rem solid #4286f4bb;
   outline-offset: -0.15rem;
