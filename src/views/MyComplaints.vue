@@ -149,16 +149,17 @@ export default defineComponent({
       totalRecords: 0,
       msg: "",
       statusMessage: "",
+      currentPage: 1,
     };
   },
 
   methods: {
-    getComplaints(param = "") {
+    getComplaints(param = "", skip = 1) {
       this.loading = true;
       setTimeout(async () => {
         try {
           const response = await axios.get(
-            `${this.API}/api/Complaints/Paging?skip=1&status=${param}`,
+            `${this.API}/api/Complaints/Paging?skip=${skip}&status=${param}`,
             {
               headers: {
                 Authorization: `Bearer ${this.isAllow}`,
@@ -252,6 +253,8 @@ export default defineComponent({
           });
         }
       }, 250);
+
+      this.currentPage = event.page + 1;
     },
     filterBy() {
       this.loading = true;
@@ -268,7 +271,7 @@ export default defineComponent({
         this.selectedValue = "";
       }
 
-      this.getComplaints(this.selectedValue);
+      this.getComplaints(this.selectedValue, this.currentPage);
     },
     getStatusMessage(status) {
       if (status.data.status === 0) {
@@ -491,6 +494,9 @@ select::-ms-expand {
     );
     animation: s3 1s infinite linear;
   }
+}
+.p-paginator-bottom {
+  margin-top: 30px;
 }
 
 @keyframes s3 {

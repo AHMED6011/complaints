@@ -86,7 +86,7 @@
             </button>
             <button
               class="btn mx-2 text-danger"
-              @click="deleteAcount(admin.id, this.API, this.isAllow)"
+              @click="deleteAcount(admin, this.API, this.isAllow)"
             >
               <i class="fa-solid fa-trash-can fa-xl"></i>
             </button>
@@ -329,6 +329,8 @@
 import axios from "axios";
 import { useCookies } from "vue3-cookies";
 import Swal from "sweetalert2";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 export default {
   data() {
@@ -366,11 +368,11 @@ export default {
         await this.filterAdmins();
       }, 500);
     },
-    getAdmins(param = "") {
+    getAdmins(param = "", skip = 1) {
       setTimeout(async () => {
         try {
           const response = await axios.get(
-            `${this.API}/api/Users/Paging?search=${param}&skip=${this.currentPage}&take=${this.itemsPerPage}`,
+            `${this.API}/api/Users/Paging?search=${param}&skip=${skip}&take=${this.itemsPerPage}`,
             {
               headers: {
                 Authorization: `Bearer ${this.isAllow}`,
@@ -485,12 +487,12 @@ export default {
       }
     },
 
-    deleteAcount(id, API, token) {
+    deleteAcount(admin, API, token) {
       try {
         swal(
           {
             title: "Emin misin?",
-            text: "",
+            text: admin.name,
             type: "warning",
             showCancelButton: true,
             confirmButtonColor: "#DD6B55",
@@ -502,14 +504,14 @@ export default {
           },
           async function (isConfirm) {
             if (isConfirm) {
-              await axios.delete(`${API}/api/Users/${id}`, {
+              await axios.delete(`${API}/api/Users/${admin.id}`, {
                 headers: {
                   Authorization: `Bearer ${token}`,
                   "Content-Type": "application/json",
                 },
               });
 
-              if (useCookies().cookies.get("userID") === id) {
+              if (useCookies().cookies.get("userID") === admin.id) {
                 useCookies().cookies.set("myCookie", "");
                 useCookies().cookies.set("isStaff", "");
                 useCookies().cookies.set("manageAdmins", "");
@@ -520,8 +522,9 @@ export default {
                 useCookies().cookies.set("userID", "");
                 location.replace("/");
               }
+
+              location.reload();
             }
-            location.reload();
           }
         );
       } catch (error) {
@@ -552,6 +555,11 @@ export default {
             "Content-type": "application/json",
           },
         });
+        toast("Veriler güncellendi", {
+          type: "success",
+          dangerouslyHTMLString: true,
+        });
+        this.getAdmins("", this.currentPage + 1);
       } catch (error) {
         Swal.fire({
           icon: "error",
@@ -627,7 +635,11 @@ export default {
             "Content-Type": "application/json",
           },
         });
-
+        this.getAdmins("", this.currentPage + 1);
+        toast("Bir yönetici eklendi", {
+          type: "success",
+          dangerouslyHTMLString: true,
+        });
         document.getElementById("close-modal").click();
         const inputElement = document.querySelector(".remove-value-password");
         inputElement.value = "";
@@ -635,7 +647,7 @@ export default {
         Swal.fire({
           icon: "error",
           title: "Oops...",
-          text: `${error.message.data}`,
+          text: `${error.response.data}`,
         });
       }
     },
@@ -849,6 +861,13 @@ $duration: 1.4s;
   outline: 1px solid #4286f4bb;
   outline-offset: 2px;
   box-shadow: none;
+}
+
+.pagination {
+  position: fixed;
+  bottom: 50px;
+  right: 50%;
+  transform: translate(50%, 0);
 }
 
 @keyframes s3 {
