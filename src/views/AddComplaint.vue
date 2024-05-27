@@ -147,7 +147,7 @@ export default {
           !this.address ||
           !this.imageFile
         ) {
-          sweetAlert("Oops...", "Sanırım girişi doldurmayı unuttunuz", "error");
+          sweetAlert("Oops...", "Sanırım alanı doldurmayı unuttun", "error");
         } else {
           const formData = new FormData();
           formData.append("files", this.imageFile, this.imageFile.name);

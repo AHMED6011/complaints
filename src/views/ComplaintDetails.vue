@@ -127,7 +127,9 @@
 
             <li class="list-group-item border-0" v-if="isStaff === 'true'">
               <h6 class="fw-bold p-1">Kullanıcı adı</h6>
-              <p class="text-secondary text-break">{{ complaint.user.name }}</p>
+              <p class="text-secondary text-break" v-if="complaint.user.name">
+                {{ complaint.user.name }}
+              </p>
             </li>
             <li class="list-group-item border-0" v-if="isStaff === 'true'">
               <h6 class="fw-bold p-1">E-posta</h6>
@@ -218,21 +220,34 @@
         </div>
       </div>
     </div>
+
+    <div class="container mt-5" v-if="complaint">
+      <div class="row">
+        <h4 class="fw-bold">Şikayet konumu</h4>
+        <div class="d-flex justify-content-center mb-5">
+          <div id="map" style="height: 300px; width: 600px"></div>
+        </div>
+      </div>
+    </div>
   </main>
 </template>
 
 <script>
 import axios from "axios";
+import Swal from "sweetalert2";
 import SendMessages from "@/components/SendMessages.vue";
 import { useDateFormat } from "@vueuse/core";
 import { useCookies } from "vue3-cookies";
+import { ref, onMounted } from "vue";
+import { Loader } from "@googlemaps/js-api-loader";
+import { useComplaintsStore } from "@/stores/index";
+import { storeToRefs } from "pinia";
 
 export default {
   props: ["id"],
   components: { SendMessages },
   data() {
     return {
-      complaint: null,
       Kategori: "",
       desc: "",
       address: "",
@@ -249,26 +264,6 @@ export default {
   methods: {
     selectedImg(event) {
       this.imageFile = event.target.files[0].name;
-    },
-    async getComplaint() {
-      try {
-        const response = await axios.get(
-          `${this.API}/api/Complaints/${this.id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${this.isAllow}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        this.complaint = response.data;
-      } catch (error) {
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: `${error.message.data}`,
-        });
-      }
     },
     async deleteComplaint() {
       try {
@@ -370,8 +365,85 @@ export default {
   },
   created() {
     this.isAdmin = this.isStaff;
-    this.getComplaint();
     this.isAllow;
+  },
+
+  setup(props) {
+    const store = useComplaintsStore();
+
+    const { API } = storeToRefs(store);
+
+    const complaint = ref(null);
+    const id = ref(props.id);
+    const cookies = useCookies().cookies;
+    const isAllowed = ref(cookies.get("token"));
+    const loader = new Loader({
+      apiKey: "AIzaSyCtuwi_Mcxd6vDRK2uDI04p1P2_DaoC06w",
+    });
+    let map;
+    let infoWindow;
+    const userLocation = ref(null);
+
+    const getComplaint = async () => {
+      try {
+        const response = await axios.get(
+          `${API.value}/api/Complaints/${id.value}`,
+          {
+            headers: {
+              Authorization: `Bearer ${isAllowed.value}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        complaint.value = response.data;
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: `${error.message.data}`,
+        });
+      }
+    };
+
+    const initMap = async () => {
+      const { Map } = await google.maps.importLibrary("maps");
+      const { AdvancedMarkerElement } = await google.maps.importLibrary(
+        "marker"
+      );
+      map = new Map(document.getElementById("map"), {
+        center: {
+          lat: complaint.value.latitude,
+          lng: complaint.value.longitude,
+        },
+        zoom: 13,
+        mapId: "ea374a954ac47ced",
+        apiKey: "AIzaSyCtuwi_Mcxd6vDRK2uDI04p1P2_DaoC06w",
+      });
+      const marker = new AdvancedMarkerElement({
+        map,
+        position: {
+          lat: complaint.value.latitude,
+          lng: complaint.value.longitude,
+        },
+      });
+    };
+
+    onMounted(async () => {
+      await loader.load();
+      await getComplaint();
+      await initMap();
+    });
+
+    return {
+      getComplaint,
+      isAllowed,
+      store,
+      API,
+      infoWindow,
+      complaint,
+      id,
+      map,
+    };
   },
 };
 </script>

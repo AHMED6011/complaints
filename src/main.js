@@ -23,7 +23,7 @@ import VueAwesomePaginate from "vue-awesome-paginate";
 
 const cookies = useCookies().cookies;
 
-const isAllowed = cookies.get("myCookie");
+const isAllowed = cookies.get("token");
 
 const app = createApp(App);
 

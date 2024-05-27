@@ -47,8 +47,8 @@
             v-model="password"
             placeholder="Şifre"
             type="password"
-            readonly="readonly"
             id="password"
+            readonly="readonly"
             ref="Pass"
             autocomplete="off"
             @focus="removeReadonlyPass()"
@@ -88,7 +88,7 @@ export default {
           password: this.password.trim(),
         };
         const response = await axios.post(`${this.API}/api/Users/login`, login);
-        this.cookies.set("myCookie", response.data.token);
+        this.cookies.set("token", response.data.token);
         this.cookies.set("isStaff", response.data.isStaff);
         this.cookies.set("manageAdmins", response.data.manageAdmins);
         this.cookies.set("canAccept", response.data.canAccept);
@@ -107,7 +107,7 @@ export default {
         Swal.fire({
           icon: "error",
           title: "Oops...",
-          text: `${error.message.data}`,
+          text: `${error.response.data}`,
         });
       }
     },

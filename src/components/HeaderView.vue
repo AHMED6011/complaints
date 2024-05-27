@@ -80,7 +80,7 @@ export default {
         },
         function (isConfirm) {
           if (isConfirm) {
-            useCookies().cookies.set("myCookie", "");
+            useCookies().cookies.set("token", "");
             useCookies().cookies.set("isStaff", "");
             useCookies().cookies.set("manageAdmins", "");
             useCookies().cookies.set("canAccept", "");

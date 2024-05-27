@@ -239,7 +239,7 @@ export default {
         );
 
         if (response.status === 200) {
-          this.cookies.set("myCookie", response.data.token);
+          this.cookies.set("token", response.data.token);
           this.cookies.set("isStaff", "false");
           Swal.fire({
             icon: "success",
@@ -261,7 +261,7 @@ export default {
         Swal.fire({
           icon: "error",
           title: "Oops...",
-          text: `${error.message.data}`,
+          text: `${error.response.data}`,
         });
       }
     },
