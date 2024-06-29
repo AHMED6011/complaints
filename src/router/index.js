@@ -67,7 +67,7 @@ const router = createRouter({
           next("/");
         }
       },
-      component: () => import("../views/MyComplaints.vue"),
+      component: () => import("../views/AllComplaints.vue"),
     },
     {
       path: "/manageAdmins",

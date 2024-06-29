@@ -18,12 +18,12 @@
           </h1>
         </div>
         <div
-          class="col-md-3 col-12 d-flex justify-sm-content-start justify-content-center p-0"
+          class="col-lg-4 col-md-6 col-12 d-flex justify-sm-content-start justify-content-center p-0"
         >
-          <label class="select">
+          <label class="select ms-2">
             <select
               class="rounded"
-              @change="filterBy()"
+              @change="filterByStatus()"
               v-model="selectedValue"
             >
               <option value="" selected>Tüm</option>
@@ -34,9 +34,28 @@
               <option value="4">Tamamlandı</option>
             </select>
           </label>
+          <label class="select ms-3">
+            <select
+              class="rounded"
+              @change="filterByCategory()"
+              v-model="selectedCagValue"
+              style="font-size: 14px"
+            >
+              <option value="" selected>Tüm Kategoriler</option>
+              <option value="Yol ve çevre düzeni">Yol ve çevre düzeni</option>
+              <option value="Kaski">Kaski</option>
+              <option value="Armadaş">Armadaş</option>
+              <option value="Akedaş">Akedaş</option>
+              <option value="Sokak hayvanı">Sokak hayvanı</option>
+              <option value="Çöp birikmesi">Çöp birikmesi</option>
+              <option value="Ulaşım ihbarı">Ulaşım ihbarı</option>
+              <option value="Zabıta">Zabıta</option>
+              <option value="Diğer">Diğer</option>
+            </select>
+          </label>
         </div>
         <div
-          class="col-md-7 d-none col-12 offset-0 offset-md-2 d-md-flex justify-sm-content-start justify-content-center p-0"
+          class="col-md-7 d-none col-12 offset-0 offset-md-1 d-md-flex justify-content-start p-0"
         >
           <h1
             class="header-title text-center fw-bold"
@@ -47,7 +66,10 @@
           </h1>
         </div>
       </div>
-      <h2 class="text-center py-5 text-danger fw-bold" v-if="complaintsNoFound">
+      <h2
+        class="text-center py-5 text-danger fw-bold"
+        v-if="complaintsNotFound"
+      >
         Şikayet Bulunamadı
       </h2>
 
@@ -139,12 +161,13 @@ export default defineComponent({
       cookies: useCookies().cookies,
       complaints: [],
       loading: false,
-      complaintsNoFound: false,
+      complaintsNotFound: false,
       noComplaints: false,
       isErr: true,
       isLoaded: true,
       sortedDataType: null,
       selectedValue: null,
+      selectedCagValue: "",
       itemsPerPage: 20,
       totalRecords: 0,
       msg: "",
@@ -154,12 +177,12 @@ export default defineComponent({
   },
 
   methods: {
-    getComplaints(param = "", skip = 1) {
+    getComplaints(statusVal = "", skip = 1, categoryVal = "") {
       this.loading = true;
       setTimeout(async () => {
         try {
           const response = await axios.get(
-            `${this.API}/api/Complaints/Paging?skip=${skip}&status=${param}`,
+            `${this.API}/api/Complaints/Paging?skip=${skip}&status=${statusVal}&category=${categoryVal}`,
             {
               headers: {
                 Authorization: `Bearer ${this.isAllow}`,
@@ -172,12 +195,13 @@ export default defineComponent({
           this.totalRecords = response.data.total;
           if (!response.data.total == 0) {
             this.isErr = false;
+            this.complaintsNotFound = false;
           } else if (
             response.data.total == 0 &&
             response.status &&
             this.selectedValue != ""
           ) {
-            this.complaintsNoFound = true;
+            this.complaintsNotFound = true;
             this.noComplaints = false;
             this.isErr = false;
           } else if (
@@ -256,7 +280,7 @@ export default defineComponent({
 
       this.currentPage = event.page + 1;
     },
-    filterBy() {
+    filterByStatus() {
       this.loading = true;
 
       if (this.selectedValue === 0) {
@@ -271,7 +295,20 @@ export default defineComponent({
         this.selectedValue = "";
       }
 
-      this.getComplaints(this.selectedValue, this.currentPage);
+      this.getComplaints(
+        this.selectedValue,
+        this.currentPage,
+        this.selectedCagValue
+      );
+    },
+    filterByCategory() {
+      this.loading = true;
+
+      this.getComplaints(
+        this.selectedValue,
+        this.currentPage,
+        this.selectedCagValue
+      );
     },
     getStatusMessage(status) {
       if (status.data.status === 0) {
@@ -308,7 +345,7 @@ export default defineComponent({
     },
   },
   mounted() {
-    this.filterBy();
+    this.filterByStatus();
   },
 });
 </script>
@@ -328,7 +365,7 @@ select::-ms-expand {
 .select {
   position: relative;
   display: flex;
-  width: 200px;
+  width: 300px;
   background-color: #fff;
   border-radius: 0.25rem;
   overflow: hidden;
